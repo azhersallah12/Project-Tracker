@@ -354,8 +354,15 @@
                 const t = translations[currentLanguage];
                 dom.modalTitle.textContent = t.modal_edit_project;
                 dom.formSubmitBtn.innerHTML = t.save_changes_button;
-                Object.keys(project).forEach(key => { if(dom.projectForm[key]) dom.projectForm[key].value = project[key] });
+
+                // --- FIX: Explicitly set each form field value ---
                 dom.projectIdInput.value = id;
+                dom.projectForm['project-title'].value = project.title || '';
+                dom.projectForm['project-amount'].value = project.amount || 0;
+                dom.projectForm['project-due-date'].value = project.dueDate || '';
+                dom.projectForm['project-status'].value = project.status || 'In Progress';
+                dom.projectForm['project-category'].value = project.category || 'Design';
+                
                 dom.fileNameDisplay.textContent = t.no_file_chosen;
                 dom.dueDateInput.classList.toggle('text-slate-400', !project.dueDate);
                 toggleModal('project', true);
