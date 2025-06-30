@@ -11,14 +11,12 @@
     <!-- Chart.js for earnings chart -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@100..900&family=Playpen+Sans+Arabic:wght@100..800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@100..900&display=swap" rel="stylesheet">
 
     <style>
         body {
-            /* === FONT STYLE UPDATED === */
             font-family: 'Noto Kufi Arabic', sans-serif;
             background-color: #1a1c1e;
         }
@@ -29,24 +27,10 @@
         .animate-fade-in {
             animation: fadeIn 0.4s ease-out forwards;
         }
-        /* Hide default file input */
-        .custom-file-input {
-            display: none;
-        }
-        .object-cover{
-            opacity: 0.8;
-        }
-        .filter-chip {
-            transition: background-color 0.2s, color 0.2s;
-        }
-        .filter-chip.active {
-            background-color: #a8c7fa;
-            color: #0c315a;
-        }
-        input[type="date"] {
-            color-scheme: dark;
-        }
-        /* Spinner for loading state */
+        .custom-file-input { display: none; }
+        .filter-chip { transition: background-color 0.2s, color 0.2s; }
+        .filter-chip.active { background-color: #a8c7fa; color: #0c315a; }
+        input[type="date"] { color-scheme: dark; }
         .spinner {
             border: 4px solid rgba(255, 255, 255, 0.3);
             border-left-color: #fff;
@@ -55,8 +39,24 @@
             height: 32px;
             animation: spin 1s linear infinite;
         }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* === STYLES FOR TAB NAVIGATION === */
+        .nav-bar {
+            background-color: #2f3033;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.2);
+        }
+        .nav-item {
+            transition: color 0.2s;
+        }
+        .nav-item.active {
+            color: #22c55e; /* Green color from image */
+        }
+        .nav-item.active .nav-text {
+             font-weight: 600;
+        }
+        main {
+            padding-bottom: 120px; /* Increased space for the nav bar and button */
         }
     </style>
 </head>
@@ -67,12 +67,11 @@
         <div class="spinner"></div>
     </div>
 
-    <!-- Main Container (initially hidden) -->
-    <div id="app" class="hidden relative min-h-screen flex-col p-4 sm:p-6 lg:p-8">
-        
+    <!-- Main Container -->
+    <div id="app" class="hidden relative min-h-screen flex-col">
         <!-- Header -->
-        <header class="mb-6 flex justify-between items-center">
-            <h1 class="text-4xl font-bold text-slate-100 tracking-tight" data-key="dashboard_title">Dashboard</h1>
+        <header class="p-4 sm:p-6 lg:p-8 mb-6 flex justify-between items-center">
+            <h1 id="header-title" class="text-2xl font-bold text-slate-100 tracking-tight">Dashboard</h1>
             <div class="relative">
                 <select id="language-switcher" class="bg-[#2f3033] text-slate-200 rounded-full py-2 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none">
                     <option value="en">English</option>
@@ -84,60 +83,125 @@
                 </div>
             </div>
         </header>
-
+        <style>
+          .customP{
+                padding-bottom: 120px !important;
+          }
+        </style>
         <!-- Main Content Area -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2 space-y-8">
-                <div class="bg-[#2f3033] p-4 rounded-2xl">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="relative">
-                             <input type="search" id="search-input" data-key-placeholder="search_placeholder" placeholder="Search projects..." class="w-full bg-[#1a1c1e] text-slate-200 rounded-full py-3 pl-12 pr-4 rtl:pr-12 rtl:pl-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                             <div class="absolute inset-y-0 left-0 rtl:left-auto rtl:right-0 flex items-center pl-4 rtl:pl-0 rtl:pr-4 pointer-events-none">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                             </div>
+        <main class="p-4 sm:p-6 lg:p-8 pt-0 flex-grow customP">
+            <!-- === TAB VIEWS === -->
+            <div id="explore-view" class="tab-view">
+                <div class="space-y-8">
+                    <div class="bg-[#2f3033] p-4 rounded-2xl">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="relative">
+                                 <input type="search" id="search-input" data-key-placeholder="search_placeholder" placeholder="Search projects..." class="w-full bg-[#1a1c1e] text-slate-200 rounded-full py-3 pl-12 pr-4 rtl:pr-12 rtl:pl-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                 <div class="absolute inset-y-0 left-0 rtl:left-auto rtl:right-0 flex items-center pl-4 rtl:pl-0 rtl:pr-4 pointer-events-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                 </div>
+                            </div>
+                            <div class="flex items-center gap-2 overflow-x-auto pb-2">
+                                 <select id="category-filter" class="bg-[#1a1c1e] text-slate-200 rounded-full py-3 px-5 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none">
+                                    <option value="all" data-key="cat_all">All Categories</option>
+                                    <option value="Design" data-key="cat_design">Design</option>
+                                    <option value="Video Editing" data-key="cat_video">Video Editing</option>
+                                 </select>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-2 overflow-x-auto pb-2">
-                             <select id="category-filter" class="bg-[#1a1c1e] text-slate-200 rounded-full py-3 px-5 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none">
-                                <option value="all" data-key="cat_all">All Categories</option>
-                                <option value="Design" data-key="cat_design">Design</option>
-                                <option value="Video Editing" data-key="cat_video">Video Editing</option>
-                             </select>
+                         <div class="mt-4 flex flex-wrap gap-2">
+                            <span class="text-sm text-slate-400 self-center mr-2 rtl:mr-0 rtl:ml-2" data-key="sort_by">Sort by:</span>
+                            <button class="filter-chip active py-1.5 px-4 rounded-full text-sm font-medium bg-slate-700" data-sort="createdAt" data-key="sort_date">Date Added</button>
+                            <button class="filter-chip py-1.5 px-4 rounded-full text-sm font-medium bg-slate-700" data-sort="title" data-key="sort_name">Name</button>
+                            <button class="filter-chip py-1.5 px-4 rounded-full text-sm font-medium bg-slate-700" data-sort="amount" data-key="sort_amount">Amount</button>
+                            <button class="filter-chip py-1.5 px-4 rounded-full text-sm font-medium bg-slate-700" data-sort="dueDate" data-key="sort_due_date">Due Date</button>
                         </div>
                     </div>
-                     <div class="mt-4 flex flex-wrap gap-2">
-                        <span class="text-sm text-slate-400 self-center mr-2 rtl:mr-0 rtl:ml-2" data-key="sort_by">Sort by:</span>
-                        <button class="filter-chip active py-1.5 px-4 rounded-full text-sm font-medium bg-slate-700" data-sort="createdAt" data-key="sort_date">Date Added</button>
-                        <button class="filter-chip py-1.5 px-4 rounded-full text-sm font-medium bg-slate-700" data-sort="title" data-key="sort_name">Name</button>
-                        <button class="filter-chip py-1.5 px-4 rounded-full text-sm font-medium bg-slate-700" data-sort="amount" data-key="sort_amount">Amount</button>
-                        <button class="filter-chip py-1.5 px-4 rounded-full text-sm font-medium bg-slate-700" data-sort="dueDate" data-key="sort_due_date">Due Date</button>
-                    </div>
-                </div>
-                <main>
                     <div id="project-list" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                        <div id="empty-state" class="hidden text-slate-500 md:col-span-2 text-center py-16">
                             <p class="text-lg" data-key="empty_state_title">No projects found.</p>
                             <p class="text-sm" data-key="empty_state_subtitle">Try adjusting your search or filters.</p>
                        </div>
                     </div>
-                </main>
-            </div>
-            <div class="lg:col-span-1 space-y-8">
-                <div class="bg-[#2f3033] p-6 rounded-2xl">
-                    <p class="text-slate-400 text-sm font-medium" data-key="total_earnings_label">Total Earnings</p>
-                    <p id="total-earnings" class="text-4xl font-bold text-white tracking-tight mt-1">$0.00</p>
-                </div>
-                <div class="bg-[#2f3033] p-6 rounded-2xl">
-                    <h3 class="font-bold text-lg text-slate-200 mb-4" data-key="earnings_chart_title">Earnings by Month</h3>
-                    <div class="relative h-64"> <canvas id="earnings-chart"></canvas> </div>
                 </div>
             </div>
-        </div>
 
-        <button id="add-project-btn" class="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 rtl:right-auto rtl:left-6 sm:rtl:right-auto sm:rtl:left-8 bg-blue-500 hover:bg-blue-400 text-white font-bold w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg transform hover:scale-110"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+            <div id="charts-view" class="tab-view hidden">
+                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="lg:col-span-2 space-y-8">
+                        <div class="bg-[#2f3033] p-6 rounded-2xl">
+                            <p class="text-slate-400 text-sm font-medium" data-key="total_earnings_label">Total Earnings</p>
+                            <p id="total-earnings" class="text-4xl font-bold text-white tracking-tight mt-1">$0.00</p>
+                        </div>
+                        <div class="bg-[#2f3033] p-6 rounded-2xl">
+                            <h3 class="font-bold text-lg text-slate-200 mb-4" data-key="earnings_chart_title">Earnings by Month</h3>
+                            <div class="relative h-96"> <canvas id="earnings-chart"></canvas> </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="profile-view" class="tab-view hidden">
+                <div class="bg-[#2f3033] p-6 sm:p-8 rounded-2xl max-w-2xl mx-auto">
+                    <div class="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-6">
+                        <img src="https://placehold.co/128x128/1a1c1e/a8c7fa?text=User" alt="User Avatar" class="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-slate-600">
+                        <div class="flex-grow">
+                            <h2 class="text-3xl font-bold text-white">User Name</h2>
+                            <p class="text-slate-400">user.name@example.com</p>
+                        </div>
+                    </div>
+                    <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                        <div class="bg-[#1a1c1e] p-4 rounded-xl">
+                            <p class="text-sm text-slate-400" data-key="profile_total_projects">Total Projects</p>
+                            <p id="profile-total-projects" class="text-2xl font-bold text-white mt-1">0</p>
+                        </div>
+                        <div class="bg-[#1a1c1e] p-4 rounded-xl">
+                            <p class="text-sm text-slate-400" data-key="profile_completed">Completed</p>
+                            <p id="profile-completed-projects" class="text-2xl font-bold text-white mt-1">0</p>
+                        </div>
+                        <div class="bg-[#1a1c1e] p-4 rounded-xl">
+                            <p class="text-sm text-slate-400" data-key="profile_avg_value">Avg. Project Value</p>
+                            <p id="profile-avg-value" class="text-2xl font-bold text-white mt-1">$0.00</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+             <div id="settings-view" class="tab-view hidden"><p class="text-center text-slate-500 mt-16">Settings section is under construction.</p></div>
+        </main>
+
+        <!-- === UPDATED BOTTOM NAVIGATION BAR === -->
+        <footer class="fixed bottom-0 left-0 right-0 h-20 nav-bar z-40">
+            <div class="flex justify-around items-center h-full max-w-lg mx-auto relative">
+                <a href="#" class="nav-item flex flex-col items-center gap-1 text-slate-400 w-16" data-tab="explore">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 7-4-4-4 4M17 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="M12 18v3"></path><path d="M10 21h4"></path></svg>
+                    <span class="text-xs nav-text" data-key="nav_explore">Explore</span>
+                </a>
+                <a href="#" class="nav-item flex flex-col items-center gap-1 text-slate-400 w-16" data-tab="charts">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path></svg>
+                    <span class="text-xs nav-text" data-key="nav_charts">Charts</span>
+                </a>
+
+                <!-- Placeholder for the add button -->
+                <div class="w-16 h-16"></div>
+
+                <a href="#" class="nav-item flex flex-col items-center gap-1 text-slate-400 w-16" data-tab="settings">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 0 2l-.15.08a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1 0-2l.15.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    <span class="text-xs nav-text" data-key="nav_settings">Settings</span>
+                </a>
+                <a href="#" class="nav-item flex flex-col items-center gap-1 text-slate-400 w-16" data-tab="profile">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    <span class="text-xs nav-text" data-key="nav_profile">Profile</span>
+                </a>
+                 <!-- Redesigned Add button -->
+                <button id="add-project-btn-nav" class="absolute left-1/2 -translate-x-1/2 -top-8 bg-[#22c55e] text-white font-bold w-16 h-16 rounded-full flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </button>
+            </div>
+        </footer>
     </div>
 
-    <!-- Project Modal -->
-    <div id="project-modal" class="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <!-- Modals -->
+    <div id="project-modal" class="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
         <div class="bg-[#2f3033] rounded-2xl shadow-xl w-full max-w-md animate-fade-in" id="modal-content">
             <form id="project-form" class="p-8">
                 <div class="flex justify-between items-center mb-6">
@@ -153,7 +217,6 @@
                         <select id="project-status" class="w-full bg-[#1a1c1e] rounded-lg px-4 py-3" required><option value="In Progress" data-key="status_in_progress"></option><option value="Completed" data-key="status_completed"></option><option value="On Hold" data-key="status_on_hold"></option></select>
                         <select id="project-category" class="w-full bg-[#1a1c1e] rounded-lg px-4 py-3" required><option value="Design" data-key="cat_design_modal"></option><option value="Video Editing" data-key="cat_video_modal"></option></select>
                     </div>
-                    <!-- New File Input Style -->
                     <div class="bg-[#1a1c1e] rounded-lg p-4 flex items-center justify-between">
                         <span id="file-name-display" class="text-sm text-slate-400 truncate pr-4" data-key="no_file_chosen">No file chosen</span>
                         <label for="project-image" class="cursor-pointer bg-slate-600 hover:bg-slate-500 text-white font-semibold py-2 px-4 rounded-lg text-sm" data-key="choose_file_button">Choose File</label>
@@ -164,9 +227,7 @@
             </form>
         </div>
     </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
         <div class="bg-[#2f3033] rounded-2xl shadow-xl w-full max-w-sm p-6 animate-fade-in text-center">
             <h3 class="text-xl font-bold text-white mb-2" data-key="delete_modal_title">Delete Project?</h3>
             <div class="flex justify-center gap-4 mt-6">
@@ -175,20 +236,16 @@
             </div>
         </div>
     </div>
-
-    <!-- === NEW: Image Viewer Modal === -->
     <div id="image-viewer-modal" class="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
         <button id="close-viewer-btn" class="absolute top-4 right-4 text-white text-5xl leading-none cursor-pointer z-10">&times;</button>
         <img id="fullscreen-image" src="" alt="Full screen project image" class="max-w-full max-h-full rounded-lg shadow-2xl">
     </div>
-
 
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
         import { getDatabase, ref, onValue, set, push, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-        // --- Firebase Configuration ---
         const firebaseConfig = {
             apiKey: "AIzaSyD5OsLRbBc8l5PXWw9vozwdye96FarFDIE",
             authDomain: "project-tracker-22bc4.firebaseapp.com",
@@ -202,24 +259,24 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         
-        // --- Translation Data ---
         const translations = {
-            en: { dashboard_title: "Dashboard", search_placeholder: "Search projects...", cat_all: "All Categories", cat_design: "Design", cat_video: "Video Editing", sort_by: "Sort by:", sort_date: "Date Added", sort_name: "Name", sort_amount: "Amount", sort_due_date: "Due Date", empty_state_title: "No projects found.", empty_state_subtitle: "Try adjusting your search or filters.", total_earnings_label: "Total Earnings", earnings_chart_title: "Earnings by Month", modal_new_project: "New Project", modal_edit_project: "Edit Project", modal_project_title: "Project Title", modal_amount: "Amount ($)", modal_due_date: "Due Date", status_in_progress: "In Progress", status_completed: "Completed", status_on_hold: "On Hold", cat_design_modal: "Design", cat_video_modal: "Video Editing", upload_button: "Upload", add_project_button: "Add Project", save_changes_button: "Save Changes", delete_modal_title: "Delete Project?", cancel_button: "Cancel", delete_button: "Delete", card_due_label: "Due:", card_no_date: "No date", no_file_chosen: "No file chosen", choose_file_button: "Choose File" },
-            ar: { dashboard_title: "لوحة التحكم", search_placeholder: "ابحث عن المشاريع...", cat_all: "كل الفئات", cat_design: "تصميم", cat_video: "تعديل الفيديو", sort_by: "فرز حسب:", sort_date: "تاريخ الإضافة", sort_name: "الاسم", sort_amount: "المبلغ", sort_due_date: "تاريخ الاستحقاق", empty_state_title: "لم يتم العثور على مشاريع.", empty_state_subtitle: "حاول تعديل بحثك.", total_earnings_label: "إجمالي الأرباح", earnings_chart_title: "الأرباح حسب الشهر", modal_new_project: "مشروع جديد", modal_edit_project: "تعديل المشروع", modal_project_title: "عنوان المشروع", modal_amount: "المبلغ ($)", modal_due_date: "تاريخ الاستحقاق", status_in_progress: "قيد التنفيذ", status_completed: "مكتمل", status_on_hold: "معلق", cat_design_modal: "تصميم", cat_video_modal: "تعديل الفيديو", upload_button: "تحميل", add_project_button: "إضافة مشروع", save_changes_button: "حفظ التغييرات", delete_modal_title: "هل تريد حذف المشروع؟", cancel_button: "إلغاء", delete_button: "حذف", card_due_label: "مستحق:", card_no_date: "لا يوجد تاريخ", no_file_chosen: "لم يتم اختيار ملف", choose_file_button: "اختر ملف" },
-            ku: { dashboard_title: "داشبۆرد", search_placeholder: "گەڕان بۆ پڕۆژە...", cat_all: "هەمووی", cat_design: "دیزاین", cat_video: "مۆنتاژی ڤیدیۆ", sort_by: "ڕیزکردن بەپێی:", sort_date: "بەرواری زیادکردن", sort_name: "ناو", sort_amount: "بڕ", sort_due_date: "بەرواری کۆتایی", empty_state_title: "هیچ پڕۆژەیەک نەدۆزرایەوە.", empty_state_subtitle: "هەوڵبدە گەڕانەکەت بگۆڕیت.", total_earnings_label: "کۆی گشتی داهات", earnings_chart_title: "داهاتی مانگانە", modal_new_project: "پڕۆژەی نوێ", modal_edit_project: "دەستکاریکردنی پڕۆژە", modal_project_title: "ناونیشانی پڕۆژە", modal_amount: "بڕی پارە ($)", modal_due_date: "بەرواری کۆتایی", status_in_progress: "لە جێبەجێکردندایە", status_completed: "تەواوبووە", status_on_hold: "ڕاگیراوە", cat_design_modal: "دیزاین", cat_video_modal: "مۆنتاژی ڤیدیۆ", upload_button: "بارکردن", add_project_button: "زیادکردنی پڕۆژە", save_changes_button: "پاشەکەوتکردن", delete_modal_title: "دڵنیایت لە سڕینەوە؟", cancel_button: "پاشگەزبوونەوە", delete_button: "سڕینەوە", card_due_label: "کاتی کۆتایی:", card_no_date: "بێ بەروار", no_file_chosen: "فایل هەڵبژێرە", choose_file_button: "فایل هەڵبژێرە" }
+            en: { dashboard_title: "Dashboard", charts_title: "Charts", profile_title: "Profile", settings_title: "Settings", search_placeholder: "Search projects...", cat_all: "All Categories", cat_design: "Design", cat_video: "Video Editing", sort_by: "Sort by:", sort_date: "Date Added", sort_name: "Name", sort_amount: "Amount", sort_due_date: "Due Date", empty_state_title: "No projects found.", empty_state_subtitle: "Try adjusting your search or filters.", total_earnings_label: "Total Earnings", earnings_chart_title: "Earnings by Month", modal_new_project: "New Project", modal_edit_project: "Edit Project", modal_project_title: "Project Title", modal_amount: "Amount ($)", modal_due_date: "Due Date", status_in_progress: "In Progress", status_completed: "Completed", status_on_hold: "On Hold", cat_design_modal: "Design", cat_video_modal: "Video Editing", add_project_button: "Add Project", save_changes_button: "Save Changes", delete_modal_title: "Delete Project?", cancel_button: "Cancel", delete_button: "Delete", card_due_label: "Due:", card_no_date: "No date", no_file_chosen: "No file chosen", choose_file_button: "Choose File", nav_explore: "Explore", nav_charts: "Charts", nav_settings: "Settings", nav_profile: "Profile", profile_total_projects: "Total Projects", profile_completed: "Completed", profile_avg_value: "Avg. Project Value" },
+            ar: { dashboard_title: "لوحة التحكم", charts_title: "الرسوم البيانية", profile_title: "الملف الشخصي", settings_title: "الإعدادات", search_placeholder: "ابحث عن المشاريع...", cat_all: "كل الفئات", cat_design: "تصميم", cat_video: "تعديل الفيديو", sort_by: "فرز حسب:", sort_date: "تاريخ الإضافة", sort_name: "الاسم", sort_amount: "المبلغ", sort_due_date: "تاريخ الاستحقاق", empty_state_title: "لم يتم العثور على مشاريع.", empty_state_subtitle: "حاول تعديل بحثك.", total_earnings_label: "إجمالي الأرباح", earnings_chart_title: "الأرباح حسب الشهر", modal_new_project: "مشروع جديد", modal_edit_project: "تعديل المشروع", modal_project_title: "عنوان المشروع", modal_amount: "المبلغ ($)", modal_due_date: "تاريخ الاستحقاق", status_in_progress: "قيد التنفيذ", status_completed: "مكتمل", status_on_hold: "معلق", cat_design_modal: "تصميم", cat_video_modal: "تعديل الفيديو", add_project_button: "إضافة مشروع", save_changes_button: "حفظ التغييرات", delete_modal_title: "هل تريد حذف المشروع؟", cancel_button: "إلغاء", delete_button: "حذف", card_due_label: "مستحق:", card_no_date: "لا يوجد تاريخ", no_file_chosen: "لم يتم اختيار ملف", choose_file_button: "اختر ملف", nav_explore: "استكشاف", nav_charts: "الرسوم", nav_settings: "الإعدادات", nav_profile: "الملف الشخصي", profile_total_projects: "إجمالي المشاريع", profile_completed: "مكتمل", profile_avg_value: "متوسط قيمة المشروع" },
+            ku: { dashboard_title: "داشبۆرد", charts_title: "چارتەکان", profile_title: "پڕۆفایل", settings_title: "ڕێکخستنەکان", search_placeholder: "گەڕان بۆ پڕۆژە...", cat_all: "هەمووی", cat_design: "دیزاین", cat_video: "مۆنتاژی ڤیدیۆ", sort_by: "ڕیزکردن بەپێی:", sort_date: "بەرواری زیادکردن", sort_name: "ناو", sort_amount: "بڕ", sort_due_date: "بەرواری کۆتایی", empty_state_title: "هیچ پڕۆژەیەک نەدۆزرایەوە.", empty_state_subtitle: "هەوڵبدە گەڕانەکەت بگۆڕیت.", total_earnings_label: "کۆی گشتی داهات", earnings_chart_title: "داهاتی مانگانە", modal_new_project: "پڕۆژەی نوێ", modal_edit_project: "دەستکاریکردنی پڕۆژە", modal_project_title: "ناونیشانی پڕۆژە", modal_amount: "بڕی پارە ($)", modal_due_date: "بەرواری کۆتایی", status_in_progress: "لە جێبەجێکردندایە", status_completed: "تەواوبووە", status_on_hold: "ڕاگیراوە", cat_design_modal: "دیزاین", cat_video_modal: "مۆنتاژی ڤیدیۆ", add_project_button: "زیادکردنی پڕۆژە", save_changes_button: "پاشەکەوتکردن", delete_modal_title: "دڵنیایت لە سڕینەوە؟", cancel_button: "پاشگەزبوونەوە", delete_button: "سڕینەوە", card_due_label: "کاتی کۆتایی:", card_no_date: "بێ بەروار", no_file_chosen: "هیچ فایلێک هەڵنەبژێردراوە", choose_file_button: "فایل هەڵبژێرە", nav_explore: "گەڕان", nav_charts: "چارتەکان", nav_settings: "ڕێکخستنەکان", nav_profile: "پڕۆفایل", profile_total_projects: "کۆی پڕۆژەکان", profile_completed: "تەواوبوو", profile_avg_value: "تێکڕای بەهای پڕۆژە" }
         };
 
-        // --- Global State & Elements ---
         let chartInstance, currentLanguage = 'en', allProjects = [];
-        let state = { searchTerm: '', sortBy: 'createdAt', sortDirection: 'desc', filterByCategory: 'all' };
+        let state = { searchTerm: '', sortBy: 'createdAt', sortDirection: 'desc', filterByCategory: 'all', activeTab: 'explore' };
+        
         const dom = {
             loadingScreen: document.getElementById('loading-screen'),
             appContainer: document.getElementById('app'),
             languageSwitcher: document.getElementById('language-switcher'),
+            headerTitle: document.getElementById('header-title'),
             projectList: document.getElementById('project-list'),
             totalEarningsEl: document.getElementById('total-earnings'),
             emptyState: document.getElementById('empty-state'),
-            addProjectBtn: document.getElementById('add-project-btn'),
+            addProjectBtnNav: document.getElementById('add-project-btn-nav'),
             projectModal: document.getElementById('project-modal'),
             deleteModal: document.getElementById('delete-modal'),
             closeModalBtn: document.getElementById('close-modal-btn'),
@@ -234,13 +291,16 @@
             projectImageInput: document.getElementById('project-image'),
             fileNameDisplay: document.getElementById('file-name-display'),
             dueDateInput: document.getElementById('project-due-date'),
-            // === NEW: Image viewer elements ===
             imageViewerModal: document.getElementById('image-viewer-modal'),
             closeViewerBtn: document.getElementById('close-viewer-btn'),
             fullscreenImage: document.getElementById('fullscreen-image'),
+            navItems: document.querySelectorAll('.nav-item'),
+            tabViews: document.querySelectorAll('.tab-view'),
+            profileTotalProjects: document.getElementById('profile-total-projects'),
+            profileCompletedProjects: document.getElementById('profile-completed-projects'),
+            profileAvgValue: document.getElementById('profile-avg-value'),
         };
 
-        // --- Functions ---
         const setLanguage = (lang) => {
             currentLanguage = lang;
             const t = translations[lang];
@@ -249,10 +309,39 @@
             document.documentElement.setAttribute('dir', (lang === 'ar' || lang === 'ku') ? 'rtl' : 'ltr');
             localStorage.setItem('projectTrackerLang', lang);
             dom.languageSwitcher.value = lang;
-            renderUI();
+            renderAll();
         };
 
-        const renderUI = () => {
+        const switchTab = (tabName) => {
+            state.activeTab = tabName;
+            
+            dom.tabViews.forEach(view => view.classList.add('hidden'));
+            document.getElementById(`${tabName}-view`).classList.remove('hidden');
+
+            dom.navItems.forEach(item => {
+                item.classList.toggle('active', item.dataset.tab === tabName);
+            });
+
+            const t = translations[currentLanguage];
+            const titleKey = tabName === 'explore' ? 'dashboard_title' : `${tabName}_title`;
+            dom.headerTitle.textContent = t[titleKey] || t['dashboard_title'];
+
+            if(tabName === 'charts') {
+                renderEarningsChart(allProjects);
+            }
+             if(tabName === 'profile') {
+                renderProfileStats(allProjects);
+            }
+        };
+
+        const renderAll = () => {
+            renderProjects();
+            const totalEarnings = allProjects.reduce((sum, p) => sum + p.amount, 0);
+            dom.totalEarningsEl.textContent = formatCurrency(totalEarnings);
+            switchTab(state.activeTab); // Re-apply current tab view and logic
+        };
+
+        const renderProjects = () => {
             let filtered = allProjects
                 .filter(p => p.title.toLowerCase().includes(state.searchTerm.toLowerCase()) && (state.filterByCategory === 'all' || p.category === state.filterByCategory))
                 .sort((a, b) => {
@@ -264,9 +353,7 @@
             
             dom.projectList.innerHTML = '';
             filtered.forEach(p => dom.projectList.appendChild(createProjectCard(p)));
-            dom.totalEarningsEl.textContent = formatCurrency(allProjects.reduce((sum, p) => sum + p.amount, 0));
             dom.emptyState.classList.toggle('hidden', filtered.length > 0);
-            renderEarningsChart(allProjects);
         };
         
         const createProjectCard = (p) => {
@@ -279,7 +366,6 @@
                 ? `${t.card_due_label} ${new Date(p.dueDate + 'T00:00:00').toLocaleDateString(currentLanguage === 'en' ? 'en-US' : 'ar-EG', { year: 'numeric', month: 'short', day: 'numeric' })}`
                 : t.card_no_date;
 
-            // === UPDATED: Added data-action="view-image" and cursor-pointer to the image ===
             card.innerHTML = `
                 <img src="${p.imageBase64 || placeholderImg}" class="h-40 w-full object-cover cursor-pointer" data-action="view-image" onerror="this.src='${placeholderImg}'">
                 <div class="p-4 flex-grow flex flex-col">
@@ -315,12 +401,22 @@
             chartInstance = new Chart(ctx, { type: 'bar', data: { labels: Object.keys(monthlyData), datasets: [{ data: Object.values(monthlyData), backgroundColor: '#a8c7fa', borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, animation: false, scales: { y: { beginAtZero: true, ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.1)' } }, x: { ticks: { color: '#94a3b8' }, grid: { display: false } } }, plugins: { legend: { display: false } } } });
         };
         
+        const renderProfileStats = (projects) => {
+            const totalProjects = projects.length;
+            const completedProjects = projects.filter(p => p.status === 'Completed').length;
+            const totalValue = projects.reduce((sum, p) => sum + p.amount, 0);
+            const avgValue = totalProjects > 0 ? totalValue / totalProjects : 0;
+
+            dom.profileTotalProjects.textContent = totalProjects;
+            dom.profileCompletedProjects.textContent = completedProjects;
+            dom.profileAvgValue.textContent = formatCurrency(avgValue);
+        };
+
         const handleFormSubmit = async (e) => {
             e.preventDefault();
             setLoading(true);
             const id = dom.projectIdInput.value;
             const file = dom.projectImageInput.files[0];
-            
             let imageBase64 = allProjects.find(p => p.id === id)?.imageBase64 || null;
 
             if (file) {
@@ -372,14 +468,12 @@
                 const t = translations[currentLanguage];
                 dom.modalTitle.textContent = t.modal_edit_project;
                 dom.formSubmitBtn.innerHTML = t.save_changes_button;
-
                 dom.projectIdInput.value = id;
                 dom.projectForm['project-title'].value = project.title || '';
                 dom.projectForm['project-amount'].value = project.amount || 0;
                 dom.projectForm['project-due-date'].value = project.dueDate || '';
                 dom.projectForm['project-status'].value = project.status || 'In Progress';
                 dom.projectForm['project-category'].value = project.category || 'Design';
-                
                 dom.fileNameDisplay.textContent = project.imageBase64 ? "Image already uploaded" : t.no_file_chosen;
                 dom.dueDateInput.classList.toggle('text-slate-400', !project.dueDate);
                 toggleModal('project', true);
@@ -409,7 +503,7 @@
 
         // --- Event Listeners ---
         dom.languageSwitcher.addEventListener('change', (e) => setLanguage(e.target.value));
-        dom.addProjectBtn.addEventListener('click', openAddModal);
+        dom.addProjectBtnNav.addEventListener('click', openAddModal);
         dom.closeModalBtn.addEventListener('click', () => toggleModal('project', false));
         dom.projectImageInput.addEventListener('change', () => {
             dom.fileNameDisplay.textContent = dom.projectImageInput.files[0]?.name || translations[currentLanguage].no_file_chosen;
@@ -417,11 +511,9 @@
         dom.projectForm.addEventListener('submit', handleFormSubmit);
         dom.dueDateInput.addEventListener('change', (e) => e.target.classList.toggle('text-slate-400', !e.target.value));
         
-        // === UPDATED: Project list listener to handle image and button clicks ===
         dom.projectList.addEventListener('click', (e) => {
             const target = e.target;
             const button = target.closest('button[data-action]');
-            
             if (button) {
                 const { action, id } = button.dataset;
                 if (action === 'edit') openEditModal(id);
@@ -431,7 +523,6 @@
                 }
                 return;
             }
-
             const image = target.closest('img[data-action="view-image"]');
             if (image) {
                 dom.fullscreenImage.setAttribute('src', image.src);
@@ -441,8 +532,8 @@
 
         dom.confirmDeleteBtn.addEventListener('click', handleDeleteProject);
         dom.cancelDeleteBtn.addEventListener('click', () => toggleModal('delete', false));
-        dom.searchInput.addEventListener('input', (e) => { state.searchTerm = e.target.value; renderUI(); });
-        dom.categoryFilter.addEventListener('change', (e) => { state.filterByCategory = e.target.value; renderUI(); });
+        dom.searchInput.addEventListener('input', (e) => { state.searchTerm = e.target.value; renderProjects(); });
+        dom.categoryFilter.addEventListener('change', (e) => { state.filterByCategory = e.target.value; renderProjects(); });
         document.querySelectorAll('.filter-chip').forEach(chip => {
             chip.addEventListener('click', (e) => {
                 document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
@@ -451,20 +542,24 @@
                 const newSortBy = chipButton.dataset.sort;
                 state.sortDirection = state.sortBy === newSortBy && state.sortDirection === 'asc' ? 'desc' : 'asc';
                 state.sortBy = newSortBy;
-                renderUI();
+                renderProjects();
             });
         });
 
-        // === NEW: Event listeners for the image viewer ===
         const closeImageViewer = () => {
             dom.imageViewerModal.classList.add('hidden');
-            dom.fullscreenImage.setAttribute('src', ''); // Clear src
+            dom.fullscreenImage.setAttribute('src', '');
         };
         dom.closeViewerBtn.addEventListener('click', closeImageViewer);
         dom.imageViewerModal.addEventListener('click', (e) => {
-            if (e.target.id === 'image-viewer-modal') {
-                closeImageViewer();
-            }
+            if (e.target.id === 'image-viewer-modal') closeImageViewer();
+        });
+
+        dom.navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                switchTab(item.dataset.tab);
+            });
         });
         
         // --- Initial Load ---
@@ -474,7 +569,7 @@
         onValue(ref(db, 'projects'), (snapshot) => {
             const data = snapshot.val() || {};
             allProjects = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-            renderUI();
+            renderAll();
             
             dom.loadingScreen.style.opacity = '0';
             setTimeout(() => {
