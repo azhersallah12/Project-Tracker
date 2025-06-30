@@ -136,6 +136,7 @@
         <button id="add-project-btn" class="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 rtl:right-auto rtl:left-6 sm:rtl:right-auto sm:rtl:left-8 bg-blue-500 hover:bg-blue-400 text-white font-bold w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg transform hover:scale-110"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
     </div>
 
+    <!-- Project Modal -->
     <div id="project-modal" class="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center p-4 hidden">
         <div class="bg-[#2f3033] rounded-2xl shadow-xl w-full max-w-md animate-fade-in" id="modal-content">
             <form id="project-form" class="p-8">
@@ -164,6 +165,7 @@
         </div>
     </div>
 
+    <!-- Delete Confirmation Modal -->
     <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center p-4 hidden">
         <div class="bg-[#2f3033] rounded-2xl shadow-xl w-full max-w-sm p-6 animate-fade-in text-center">
             <h3 class="text-xl font-bold text-white mb-2" data-key="delete_modal_title">Delete Project?</h3>
@@ -173,6 +175,13 @@
             </div>
         </div>
     </div>
+
+    <!-- === NEW: Image Viewer Modal === -->
+    <div id="image-viewer-modal" class="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
+        <button id="close-viewer-btn" class="absolute top-4 right-4 text-white text-5xl leading-none cursor-pointer z-10">&times;</button>
+        <img id="fullscreen-image" src="" alt="Full screen project image" class="max-w-full max-h-full rounded-lg shadow-2xl">
+    </div>
+
 
     <!-- Firebase SDK -->
     <script type="module">
@@ -197,7 +206,7 @@
         const translations = {
             en: { dashboard_title: "Dashboard", search_placeholder: "Search projects...", cat_all: "All Categories", cat_design: "Design", cat_video: "Video Editing", sort_by: "Sort by:", sort_date: "Date Added", sort_name: "Name", sort_amount: "Amount", sort_due_date: "Due Date", empty_state_title: "No projects found.", empty_state_subtitle: "Try adjusting your search or filters.", total_earnings_label: "Total Earnings", earnings_chart_title: "Earnings by Month", modal_new_project: "New Project", modal_edit_project: "Edit Project", modal_project_title: "Project Title", modal_amount: "Amount ($)", modal_due_date: "Due Date", status_in_progress: "In Progress", status_completed: "Completed", status_on_hold: "On Hold", cat_design_modal: "Design", cat_video_modal: "Video Editing", upload_button: "Upload", add_project_button: "Add Project", save_changes_button: "Save Changes", delete_modal_title: "Delete Project?", cancel_button: "Cancel", delete_button: "Delete", card_due_label: "Due:", card_no_date: "No date", no_file_chosen: "No file chosen", choose_file_button: "Choose File" },
             ar: { dashboard_title: "لوحة التحكم", search_placeholder: "ابحث عن المشاريع...", cat_all: "كل الفئات", cat_design: "تصميم", cat_video: "تعديل الفيديو", sort_by: "فرز حسب:", sort_date: "تاريخ الإضافة", sort_name: "الاسم", sort_amount: "المبلغ", sort_due_date: "تاريخ الاستحقاق", empty_state_title: "لم يتم العثور على مشاريع.", empty_state_subtitle: "حاول تعديل بحثك.", total_earnings_label: "إجمالي الأرباح", earnings_chart_title: "الأرباح حسب الشهر", modal_new_project: "مشروع جديد", modal_edit_project: "تعديل المشروع", modal_project_title: "عنوان المشروع", modal_amount: "المبلغ ($)", modal_due_date: "تاريخ الاستحقاق", status_in_progress: "قيد التنفيذ", status_completed: "مكتمل", status_on_hold: "معلق", cat_design_modal: "تصميم", cat_video_modal: "تعديل الفيديو", upload_button: "تحميل", add_project_button: "إضافة مشروع", save_changes_button: "حفظ التغييرات", delete_modal_title: "هل تريد حذف المشروع؟", cancel_button: "إلغاء", delete_button: "حذف", card_due_label: "مستحق:", card_no_date: "لا يوجد تاريخ", no_file_chosen: "لم يتم اختيار ملف", choose_file_button: "اختر ملف" },
-            ku: { dashboard_title: "داشبۆرد", search_placeholder: "گەڕان بۆ پڕۆژە...", cat_all: "هەمووی", cat_design: "دیزاین", cat_video: "مۆنتاژی ڤیدیۆ", sort_by: "ڕیزکردن بەپێی:", sort_date: "بەرواری زیادکردن", sort_name: "ناو", sort_amount: "بڕ", sort_due_date: "بەرواری کۆتایی", empty_state_title: "هیچ پڕۆژەیەک نەدۆزرایەوە.", empty_state_subtitle: "هەوڵبدە گەڕانەکەت بگۆڕیت.", total_earnings_label: "کۆی گشتی داهات", earnings_chart_title: "داهاتی مانگانە", modal_new_project: "پڕۆژەی نوێ", modal_edit_project: "دەستکاریکردنی پڕۆژە", modal_project_title: "ناونیشانی پڕۆژە", modal_amount: "بڕی پارە ($)", modal_due_date: "بەرواری کۆتایی", status_in_progress: "لە جێبەجێکردندایە", status_completed: "تەواوبووە", status_on_hold: "ڕاگیراوە", cat_design_modal: "دیزاین", cat_video_modal: "مۆنتاژی ڤیدیۆ", upload_button: "بارکردن", add_project_button: "زیادکردنی پڕۆژە", save_changes_button: "پاشەکەوتکردن", delete_modal_title: "دڵنیایت لە سڕینەوە؟", cancel_button: "پاشگەزبوونەوە", delete_button: "سڕینەوە", card_due_label: "کاتی کۆتایی:", card_no_date: "بێ بەروار", no_file_chosen: "هیچ فایلێک هەڵنەبژێردراوە", choose_file_button: "فایل هەڵبژێرە" }
+            ku: { dashboard_title: "داشبۆرد", search_placeholder: "گەڕان بۆ پڕۆژە...", cat_all: "هەمووی", cat_design: "دیزاین", cat_video: "مۆنتاژی ڤیدیۆ", sort_by: "ڕیزکردن بەپێی:", sort_date: "بەرواری زیادکردن", sort_name: "ناو", sort_amount: "بڕ", sort_due_date: "بەرواری کۆتایی", empty_state_title: "هیچ پڕۆژەیەک نەدۆزرایەوە.", empty_state_subtitle: "هەوڵبدە گەڕانەکەت بگۆڕیت.", total_earnings_label: "کۆی گشتی داهات", earnings_chart_title: "داهاتی مانگانە", modal_new_project: "پڕۆژەی نوێ", modal_edit_project: "دەستکاریکردنی پڕۆژە", modal_project_title: "ناونیشانی پڕۆژە", modal_amount: "بڕی پارە ($)", modal_due_date: "بەرواری کۆتایی", status_in_progress: "لە جێبەجێکردندایە", status_completed: "تەواوبووە", status_on_hold: "ڕاگیراوە", cat_design_modal: "دیزاین", cat_video_modal: "مۆنتاژی ڤیدیۆ", upload_button: "بارکردن", add_project_button: "زیادکردنی پڕۆژە", save_changes_button: "پاشەکەوتکردن", delete_modal_title: "دڵنیایت لە سڕینەوە؟", cancel_button: "پاشگەزبوونەوە", delete_button: "سڕینەوە", card_due_label: "کاتی کۆتایی:", card_no_date: "بێ بەروار", no_file_chosen: "فایل هەڵبژێرە", choose_file_button: "فایل هەڵبژێرە" }
         };
 
         // --- Global State & Elements ---
@@ -225,6 +234,10 @@
             projectImageInput: document.getElementById('project-image'),
             fileNameDisplay: document.getElementById('file-name-display'),
             dueDateInput: document.getElementById('project-due-date'),
+            // === NEW: Image viewer elements ===
+            imageViewerModal: document.getElementById('image-viewer-modal'),
+            closeViewerBtn: document.getElementById('close-viewer-btn'),
+            fullscreenImage: document.getElementById('fullscreen-image'),
         };
 
         // --- Functions ---
@@ -266,8 +279,9 @@
                 ? `${t.card_due_label} ${new Date(p.dueDate + 'T00:00:00').toLocaleDateString(currentLanguage === 'en' ? 'en-US' : 'ar-EG', { year: 'numeric', month: 'short', day: 'numeric' })}`
                 : t.card_no_date;
 
+            // === UPDATED: Added data-action="view-image" and cursor-pointer to the image ===
             card.innerHTML = `
-                <img src="${p.imageBase64 || placeholderImg}" class="h-40 w-full object-cover">
+                <img src="${p.imageBase64 || placeholderImg}" class="h-40 w-full object-cover cursor-pointer" data-action="view-image" onerror="this.src='${placeholderImg}'">
                 <div class="p-4 flex-grow flex flex-col">
                     <div class="flex justify-between items-start mb-2">
                         <span class="text-xs font-medium bg-blue-900/50 text-blue-300 py-1 px-2 rounded-full">${t[p.category === 'Design' ? 'cat_design' : 'cat_video']}</span>
@@ -359,7 +373,6 @@
                 dom.modalTitle.textContent = t.modal_edit_project;
                 dom.formSubmitBtn.innerHTML = t.save_changes_button;
 
-                // --- FIX: Explicitly set each form field value ---
                 dom.projectIdInput.value = id;
                 dom.projectForm['project-title'].value = project.title || '';
                 dom.projectForm['project-amount'].value = project.amount || 0;
@@ -367,7 +380,7 @@
                 dom.projectForm['project-status'].value = project.status || 'In Progress';
                 dom.projectForm['project-category'].value = project.category || 'Design';
                 
-                dom.fileNameDisplay.textContent = t.no_file_chosen;
+                dom.fileNameDisplay.textContent = project.imageBase64 ? "Image already uploaded" : t.no_file_chosen;
                 dom.dueDateInput.classList.toggle('text-slate-400', !project.dueDate);
                 toggleModal('project', true);
             }
@@ -403,16 +416,29 @@
         });
         dom.projectForm.addEventListener('submit', handleFormSubmit);
         dom.dueDateInput.addEventListener('change', (e) => e.target.classList.toggle('text-slate-400', !e.target.value));
+        
+        // === UPDATED: Project list listener to handle image and button clicks ===
         dom.projectList.addEventListener('click', (e) => {
-            const button = e.target.closest('button[data-action]');
-            if (!button) return;
-            const { action, id } = button.dataset;
-            if (action === 'edit') openEditModal(id);
-            if (action === 'delete') {
-                dom.confirmDeleteBtn.dataset.id = id;
-                toggleModal('delete', true);
+            const target = e.target;
+            const button = target.closest('button[data-action]');
+            
+            if (button) {
+                const { action, id } = button.dataset;
+                if (action === 'edit') openEditModal(id);
+                if (action === 'delete') {
+                    dom.confirmDeleteBtn.dataset.id = id;
+                    toggleModal('delete', true);
+                }
+                return;
+            }
+
+            const image = target.closest('img[data-action="view-image"]');
+            if (image) {
+                dom.fullscreenImage.setAttribute('src', image.src);
+                dom.imageViewerModal.classList.remove('hidden');
             }
         });
+
         dom.confirmDeleteBtn.addEventListener('click', handleDeleteProject);
         dom.cancelDeleteBtn.addEventListener('click', () => toggleModal('delete', false));
         dom.searchInput.addEventListener('input', (e) => { state.searchTerm = e.target.value; renderUI(); });
@@ -428,6 +454,18 @@
                 renderUI();
             });
         });
+
+        // === NEW: Event listeners for the image viewer ===
+        const closeImageViewer = () => {
+            dom.imageViewerModal.classList.add('hidden');
+            dom.fullscreenImage.setAttribute('src', ''); // Clear src
+        };
+        dom.closeViewerBtn.addEventListener('click', closeImageViewer);
+        dom.imageViewerModal.addEventListener('click', (e) => {
+            if (e.target.id === 'image-viewer-modal') {
+                closeImageViewer();
+            }
+        });
         
         // --- Initial Load ---
         const savedLang = localStorage.getItem('projectTrackerLang') || 'en';
@@ -438,13 +476,12 @@
             allProjects = Object.keys(data).map(key => ({ id: key, ...data[key] }));
             renderUI();
             
-            // Show app and hide loading screen
             dom.loadingScreen.style.opacity = '0';
             setTimeout(() => {
                 dom.loadingScreen.classList.add('hidden');
                 dom.appContainer.classList.remove('hidden');
-                dom.appContainer.classList.add('flex'); // Make sure it's visible
-            }, 300); // Match duration of opacity transition
+                dom.appContainer.classList.add('flex');
+            }, 300);
         });
 
     </script>
