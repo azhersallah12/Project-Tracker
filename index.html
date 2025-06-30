@@ -11,14 +11,15 @@
     <!-- Chart.js for earnings chart -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- Google Fonts: Roboto -->
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playpen+Sans+Arabic:wght@300;400;500;700&display=swap" rel="stylesheet">
 
     <style>
         body {
-            font-family: 'Roboto', sans-serif;
+            /* --- FONT UPDATED HERE --- */
+            font-family: 'Playpen Sans Arabic', sans-serif;
             background-color: #1a1c1e;
         }
         @keyframes fadeIn {
@@ -31,6 +32,9 @@
         /* Hide default file input */
         .custom-file-input {
             display: none;
+        }
+        .object-cover{
+            opacity: 0.8;
         }
         .filter-chip {
             transition: background-color 0.2s, color 0.2s;
@@ -193,7 +197,7 @@
         const translations = {
             en: { dashboard_title: "Dashboard", search_placeholder: "Search projects...", cat_all: "All Categories", cat_design: "Design", cat_video: "Video Editing", sort_by: "Sort by:", sort_date: "Date Added", sort_name: "Name", sort_amount: "Amount", sort_due_date: "Due Date", empty_state_title: "No projects found.", empty_state_subtitle: "Try adjusting your search or filters.", total_earnings_label: "Total Earnings", earnings_chart_title: "Earnings by Month", modal_new_project: "New Project", modal_edit_project: "Edit Project", modal_project_title: "Project Title", modal_amount: "Amount ($)", modal_due_date: "Due Date", status_in_progress: "In Progress", status_completed: "Completed", status_on_hold: "On Hold", cat_design_modal: "Design", cat_video_modal: "Video Editing", upload_button: "Upload", add_project_button: "Add Project", save_changes_button: "Save Changes", delete_modal_title: "Delete Project?", cancel_button: "Cancel", delete_button: "Delete", card_due_label: "Due:", card_no_date: "No date", no_file_chosen: "No file chosen", choose_file_button: "Choose File" },
             ar: { dashboard_title: "لوحة التحكم", search_placeholder: "ابحث عن المشاريع...", cat_all: "كل الفئات", cat_design: "تصميم", cat_video: "تعديل الفيديو", sort_by: "فرز حسب:", sort_date: "تاريخ الإضافة", sort_name: "الاسم", sort_amount: "المبلغ", sort_due_date: "تاريخ الاستحقاق", empty_state_title: "لم يتم العثور على مشاريع.", empty_state_subtitle: "حاول تعديل بحثك.", total_earnings_label: "إجمالي الأرباح", earnings_chart_title: "الأرباح حسب الشهر", modal_new_project: "مشروع جديد", modal_edit_project: "تعديل المشروع", modal_project_title: "عنوان المشروع", modal_amount: "المبلغ ($)", modal_due_date: "تاريخ الاستحقاق", status_in_progress: "قيد التنفيذ", status_completed: "مكتمل", status_on_hold: "معلق", cat_design_modal: "تصميم", cat_video_modal: "تعديل الفيديو", upload_button: "تحميل", add_project_button: "إضافة مشروع", save_changes_button: "حفظ التغييرات", delete_modal_title: "هل تريد حذف المشروع؟", cancel_button: "إلغاء", delete_button: "حذف", card_due_label: "مستحق:", card_no_date: "لا يوجد تاريخ", no_file_chosen: "لم يتم اختيار ملف", choose_file_button: "اختر ملف" },
-            ku: { dashboard_title: "داشبۆرد", search_placeholder: "گەڕان بۆ پڕۆژە...", cat_all: "هەموو پۆلەکان", cat_design: "دیزاین", cat_video: "مۆنتاژی ڤیدیۆ", sort_by: "ڕیزکردن بەپێی:", sort_date: "بەرواری زیادکردن", sort_name: "ناو", sort_amount: "بڕ", sort_due_date: "بەرواری کۆتایی", empty_state_title: "هیچ پڕۆژەیەک نەدۆزرایەوە.", empty_state_subtitle: "هەوڵبدە گەڕانەکەت بگۆڕیت.", total_earnings_label: "کۆی گشتی داهات", earnings_chart_title: "داهاتی مانگانە", modal_new_project: "پڕۆژەی نوێ", modal_edit_project: "دەستکاریکردنی پڕۆژە", modal_project_title: "ناونیشانی پڕۆژە", modal_amount: "بڕی پارە ($)", modal_due_date: "بەرواری کۆتایی", status_in_progress: "لە جێبەجێکردندایە", status_completed: "تەواوبووە", status_on_hold: "ڕاگیراوە", cat_design_modal: "دیزاین", cat_video_modal: "مۆنتاژی ڤیدیۆ", upload_button: "بارکردن", add_project_button: "زیادکردنی پڕۆژە", save_changes_button: "پاشەکەوتکردن", delete_modal_title: "دڵنیایت لە سڕینەوە؟", cancel_button: "پاشگەزبوونەوە", delete_button: "سڕینەوە", card_due_label: "کاتی کۆتایی:", card_no_date: "بێ بەروار", no_file_chosen: "هیچ فایلێک هەڵنەبژێردراوە", choose_file_button: "فایل هەڵبژێرە" }
+            ku: { dashboard_title: "داشبۆرد", search_placeholder: "گەڕان بۆ پڕۆژە...", cat_all: "هەمووی", cat_design: "دیزاین", cat_video: "مۆنتاژی ڤیدیۆ", sort_by: "ڕیزکردن بەپێی:", sort_date: "بەرواری زیادکردن", sort_name: "ناو", sort_amount: "بڕ", sort_due_date: "بەرواری کۆتایی", empty_state_title: "هیچ پڕۆژەیەک نەدۆزرایەوە.", empty_state_subtitle: "هەوڵبدە گەڕانەکەت بگۆڕیت.", total_earnings_label: "کۆی گشتی داهات", earnings_chart_title: "داهاتی مانگانە", modal_new_project: "پڕۆژەی نوێ", modal_edit_project: "دەستکاریکردنی پڕۆژە", modal_project_title: "ناونیشانی پڕۆژە", modal_amount: "بڕی پارە ($)", modal_due_date: "بەرواری کۆتایی", status_in_progress: "لە جێبەجێکردندایە", status_completed: "تەواوبووە", status_on_hold: "ڕاگیراوە", cat_design_modal: "دیزاین", cat_video_modal: "مۆنتاژی ڤیدیۆ", upload_button: "بارکردن", add_project_button: "زیادکردنی پڕۆژە", save_changes_button: "پاشەکەوتکردن", delete_modal_title: "دڵنیایت لە سڕینەوە؟", cancel_button: "پاشگەزبوونەوە", delete_button: "سڕینەوە", card_due_label: "کاتی کۆتایی:", card_no_date: "بێ بەروار", no_file_chosen: "هیچ فایلێک هەڵنەبژێردراوە", choose_file_button: "فایل هەڵبژێرە" }
         };
 
         // --- Global State & Elements ---
