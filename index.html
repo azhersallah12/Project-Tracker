@@ -5,21 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Project Dashboard</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Chart.js for earnings chart -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playpen+Sans+Arabic:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@100..900&family=Playpen+Sans+Arabic:wght@100..800&display=swap" rel="stylesheet">
 
     <style>
         body {
-            /* --- FONT UPDATED HERE --- */
-            font-family: 'Playpen Sans Arabic', sans-serif;
+            /* === FONT STYLE UPDATED === */
+            font-family: 'Noto Kufi Arabic', sans-serif;
             background-color: #1a1c1e;
         }
         @keyframes fadeIn {
@@ -62,15 +60,12 @@
 </head>
 <body class="text-slate-200 antialiased">
 
-    <!-- Loading Screen -->
     <div id="loading-screen" class="fixed inset-0 bg-[#1a1c1e] flex items-center justify-center z-50 transition-opacity duration-300">
         <div class="spinner"></div>
     </div>
 
-    <!-- Main Container (initially hidden) -->
     <div id="app" class="hidden relative min-h-screen flex-col p-4 sm:p-6 lg:p-8">
         
-        <!-- Header -->
         <header class="mb-6 flex justify-between items-center">
             <h1 class="text-4xl font-bold text-slate-100 tracking-tight" data-key="dashboard_title">Dashboard</h1>
             <div class="relative">
@@ -85,7 +80,6 @@
             </div>
         </header>
 
-        <!-- Main Content Area -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-8">
                 <div class="bg-[#2f3033] p-4 rounded-2xl">
@@ -136,7 +130,7 @@
         <button id="add-project-btn" class="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 rtl:right-auto rtl:left-6 sm:rtl:right-auto sm:rtl:left-8 bg-blue-500 hover:bg-blue-400 text-white font-bold w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg transform hover:scale-110"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
     </div>
 
-    <div id="project-modal" class="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div id="project-modal" class="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center p-4 hidden z-40">
         <div class="bg-[#2f3033] rounded-2xl shadow-xl w-full max-w-md animate-fade-in" id="modal-content">
             <form id="project-form" class="p-8">
                 <div class="flex justify-between items-center mb-6">
@@ -152,7 +146,6 @@
                         <select id="project-status" class="w-full bg-[#1a1c1e] rounded-lg px-4 py-3" required><option value="In Progress" data-key="status_in_progress"></option><option value="Completed" data-key="status_completed"></option><option value="On Hold" data-key="status_on_hold"></option></select>
                         <select id="project-category" class="w-full bg-[#1a1c1e] rounded-lg px-4 py-3" required><option value="Design" data-key="cat_design_modal"></option><option value="Video Editing" data-key="cat_video_modal"></option></select>
                     </div>
-                    <!-- New File Input Style -->
                     <div class="bg-[#1a1c1e] rounded-lg p-4 flex items-center justify-between">
                         <span id="file-name-display" class="text-sm text-slate-400 truncate pr-4" data-key="no_file_chosen">No file chosen</span>
                         <label for="project-image" class="cursor-pointer bg-slate-600 hover:bg-slate-500 text-white font-semibold py-2 px-4 rounded-lg text-sm" data-key="choose_file_button">Choose File</label>
@@ -164,7 +157,7 @@
         </div>
     </div>
 
-    <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center p-4 hidden z-40">
         <div class="bg-[#2f3033] rounded-2xl shadow-xl w-full max-w-sm p-6 animate-fade-in text-center">
             <h3 class="text-xl font-bold text-white mb-2" data-key="delete_modal_title">Delete Project?</h3>
             <div class="flex justify-center gap-4 mt-6">
@@ -174,10 +167,17 @@
         </div>
     </div>
 
-    <!-- Firebase SDK -->
+    <div id="image-viewer-modal" class="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
+        <div class="relative max-w-4xl max-h-full">
+            <img id="modal-image-content" src="" alt="Project Image" class="max-w-full max-h-[90vh] rounded-lg shadow-xl">
+            <button id="close-image-viewer-btn" class="absolute top-2 right-2 text-white bg-black bg-opacity-50 rounded-full p-2 leading-none text-3xl">&times;</button>
+        </div>
+    </div>
+
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getDatabase, ref, onValue, set, push, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+        import { getDatabase, ref, onValue, set, push, remove, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
         // --- Firebase Configuration ---
         const firebaseConfig = {
@@ -213,6 +213,9 @@
             addProjectBtn: document.getElementById('add-project-btn'),
             projectModal: document.getElementById('project-modal'),
             deleteModal: document.getElementById('delete-modal'),
+            imageViewerModal: document.getElementById('image-viewer-modal'), // New element
+            modalImageContent: document.getElementById('modal-image-content'), // New element
+            closeImageViewerBtn: document.getElementById('close-image-viewer-btn'), // New element
             closeModalBtn: document.getElementById('close-modal-btn'),
             cancelDeleteBtn: document.getElementById('cancel-delete-btn'),
             confirmDeleteBtn: document.getElementById('confirm-delete-btn'),
@@ -240,19 +243,23 @@
         };
 
         const renderUI = () => {
-            let filtered = allProjects
-                .filter(p => p.title.toLowerCase().includes(state.searchTerm.toLowerCase()) && (state.filterByCategory === 'all' || p.category === state.filterByCategory))
-                .sort((a, b) => {
-                    let valA = a[state.sortBy], valB = b[state.sortBy];
-                    if (state.sortBy === 'title') { valA = valA.toLowerCase(); valB = valB.toLowerCase(); }
-                    let comp = valA > valB ? 1 : (valA < valB ? -1 : 0);
-                    return state.sortDirection === 'desc' ? comp * -1 : comp;
-                });
-            
-            dom.projectList.innerHTML = '';
-            filtered.forEach(p => dom.projectList.appendChild(createProjectCard(p)));
+            if (!allProjects.length && !state.searchTerm) {
+                // Initial load, chart and earnings can be processed later
+            } else {
+                let filtered = allProjects
+                    .filter(p => p.title.toLowerCase().includes(state.searchTerm.toLowerCase()) && (state.filterByCategory === 'all' || p.category === state.filterByCategory))
+                    .sort((a, b) => {
+                        let valA = a[state.sortBy], valB = b[state.sortBy];
+                        if (state.sortBy === 'title') { valA = valA.toLowerCase(); valB = valB.toLowerCase(); }
+                        let comp = valA > valB ? 1 : (valA < valB ? -1 : 0);
+                        return state.sortDirection === 'desc' ? comp * -1 : comp;
+                    });
+                
+                dom.projectList.innerHTML = '';
+                filtered.forEach(p => dom.projectList.appendChild(createProjectCard(p)));
+                dom.emptyState.classList.toggle('hidden', filtered.length > 0);
+            }
             dom.totalEarningsEl.textContent = formatCurrency(allProjects.reduce((sum, p) => sum + p.amount, 0));
-            dom.emptyState.classList.toggle('hidden', filtered.length > 0);
             renderEarningsChart(allProjects);
         };
         
@@ -266,8 +273,9 @@
                 ? `${t.card_due_label} ${new Date(p.dueDate + 'T00:00:00').toLocaleDateString(currentLanguage === 'en' ? 'en-US' : 'ar-EG', { year: 'numeric', month: 'short', day: 'numeric' })}`
                 : t.card_no_date;
 
+            // === UPDATED: Image is now clickable ===
             card.innerHTML = `
-                <img src="${p.imageBase64 || placeholderImg}" class="h-40 w-full object-cover">
+                <img src="${p.imageBase64 || placeholderImg}" class="h-40 w-full object-cover cursor-pointer project-image-clickable">
                 <div class="p-4 flex-grow flex flex-col">
                     <div class="flex justify-between items-start mb-2">
                         <span class="text-xs font-medium bg-blue-900/50 text-blue-300 py-1 px-2 rounded-full">${t[p.category === 'Design' ? 'cat_design' : 'cat_video']}</span>
@@ -339,6 +347,7 @@
             
             toggleModal('project', false);
             setLoading(false);
+            // After submitting, the onValue listener will automatically re-render the UI.
         };
         
         const openAddModal = () => {
@@ -359,7 +368,6 @@
                 dom.modalTitle.textContent = t.modal_edit_project;
                 dom.formSubmitBtn.innerHTML = t.save_changes_button;
 
-                // --- FIX: Explicitly set each form field value ---
                 dom.projectIdInput.value = id;
                 dom.projectForm['project-title'].value = project.title || '';
                 dom.projectForm['project-amount'].value = project.amount || 0;
@@ -391,7 +399,12 @@
             }
         };
 
-        const toggleModal = (name, show) => document.getElementById(`${name}-modal`).classList.toggle('hidden', !show);
+        const toggleModal = (name, show) => {
+            const modal = document.getElementById(`${name}-modal`);
+            if (modal) {
+                modal.classList.toggle('hidden', !show);
+            }
+        };
         const formatCurrency = (amount) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
 
         // --- Event Listeners ---
@@ -403,18 +416,36 @@
         });
         dom.projectForm.addEventListener('submit', handleFormSubmit);
         dom.dueDateInput.addEventListener('change', (e) => e.target.classList.toggle('text-slate-400', !e.target.value));
+        
+        // === UPDATED: Event listener for project list to handle images, edit, and delete ===
         dom.projectList.addEventListener('click', (e) => {
             const button = e.target.closest('button[data-action]');
-            if (!button) return;
-            const { action, id } = button.dataset;
-            if (action === 'edit') openEditModal(id);
-            if (action === 'delete') {
-                dom.confirmDeleteBtn.dataset.id = id;
-                toggleModal('delete', true);
+            const image = e.target.closest('.project-image-clickable');
+
+            if (button) {
+                const { action, id } = button.dataset;
+                if (action === 'edit') openEditModal(id);
+                if (action === 'delete') {
+                    dom.confirmDeleteBtn.dataset.id = id;
+                    toggleModal('delete', true);
+                }
+            } else if (image) {
+                dom.modalImageContent.src = image.src;
+                toggleModal('image-viewer', true);
             }
         });
+        
         dom.confirmDeleteBtn.addEventListener('click', handleDeleteProject);
         dom.cancelDeleteBtn.addEventListener('click', () => toggleModal('delete', false));
+        
+        // --- NEW: Event listeners for image viewer modal ---
+        dom.closeImageViewerBtn.addEventListener('click', () => toggleModal('image-viewer', false));
+        dom.imageViewerModal.addEventListener('click', (e) => {
+            if (e.target.id === 'image-viewer-modal') { // Close only if backdrop is clicked
+                toggleModal('image-viewer', false);
+            }
+        });
+        
         dom.searchInput.addEventListener('input', (e) => { state.searchTerm = e.target.value; renderUI(); });
         dom.categoryFilter.addEventListener('change', (e) => { state.filterByCategory = e.target.value; renderUI(); });
         document.querySelectorAll('.filter-chip').forEach(chip => {
@@ -430,22 +461,36 @@
         });
         
         // --- Initial Load ---
-        const savedLang = localStorage.getItem('projectTrackerLang') || 'en';
-        setLanguage(savedLang);
-        
-        onValue(ref(db, 'projects'), (snapshot) => {
-            const data = snapshot.val() || {};
-            allProjects = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-            renderUI();
+        const initializeApp = async () => {
+            const savedLang = localStorage.getItem('projectTrackerLang') || 'en';
+            setLanguage(savedLang);
             
-            // Show app and hide loading screen
-            dom.loadingScreen.style.opacity = '0';
-            setTimeout(() => {
-                dom.loadingScreen.classList.add('hidden');
+            // Listen for real-time updates
+            onValue(ref(db, 'projects'), (snapshot) => {
+                const data = snapshot.val() || {};
+                allProjects = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+                renderUI();
+            });
+
+            // === UPDATED: Improved loading screen logic ===
+            // Fetch initial data once to know when loading is complete.
+            try {
+                await get(ref(db, 'projects'));
+                // Data is loaded, hide the loading screen
+                dom.loadingScreen.style.opacity = '0';
+                dom.loadingScreen.addEventListener('transitionend', () => {
+                    dom.loadingScreen.classList.add('hidden');
+                }, { once: true });
                 dom.appContainer.classList.remove('hidden');
-                dom.appContainer.classList.add('flex'); // Make sure it's visible
-            }, 300); // Match duration of opacity transition
-        });
+                dom.appContainer.classList.add('flex');
+            } catch (error) {
+                console.error("Firebase read failed:", error);
+                // Handle error, maybe show an error message
+                dom.loadingScreen.innerHTML = "Failed to load data.";
+            }
+        };
+
+        initializeApp();
 
     </script>
 </body>
