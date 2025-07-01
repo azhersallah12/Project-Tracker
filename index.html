@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Project Dashboard</title>
     
-    <!-- Tailwindd CSS -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Chart.js -->
@@ -322,25 +322,21 @@
 
     <!-- Firebase SDK -->
     <script type="module">
-        // Import Firebase services
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
         import { getDatabase, ref, onValue, set, push, remove, off } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, updateProfile } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-        import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app-check.js";
 
-        // Import the configuration from the auto-generated file.
-        // This file does not exist in your local project. It is created by the GitHub Action during deployment.
-        import { firebaseConfig } from './firebase-config.js';
-
-        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5OsLRbBc8l5PXWw9vozwdye96FarFDIE",
+            authDomain: "project-tracker-22bc4.firebaseapp.com",
+            databaseURL: "https://project-tracker-22bc4-default-rtdb.firebaseio.com",
+            projectId: "project-tracker-22bc4",
+            storageBucket: "project-tracker-22bc4.appspot.com",
+            messagingSenderId: "147357551717",
+            appId: "1:147357551717:web:472f8dca4d1ab67085ca8c",
+            measurementId: "G-5TKFL1SY7D"
+        };
         const app = initializeApp(firebaseConfig);
-
-        // Initialize App Check
-        const appCheck = initializeAppCheck(app, {
-          provider: new ReCaptchaV3Provider('YOUR_RECAPTCHA_V3_SITE_KEY'), // This will be replaced by the GitHub Action
-          isTokenAutoRefreshEnabled: true
-        });
-
         const db = getDatabase(app);
         const auth = getAuth(app);
         
@@ -350,9 +346,8 @@
             ku: { dashboard_title: "داشبۆرد", charts_title: "چارتەکان", profile_title: "پڕۆفایل", settings_title: "ڕێکخستنەکان", search_placeholder: "گەڕان بۆ پڕۆژە...", cat_all: "هەمووی", sort_by: "ڕیزکردن بەپێی:", sort_date: "بەرواری زیادکردن", sort_name: "ناو", sort_amount: "بڕ", sort_due_date: "بەرواری کۆتایی", empty_state_title: "هیچ پڕۆژەیەک نەدۆزرایەوە.", empty_state_subtitle: "یەکەم پڕۆژەی خۆت زیاد بکە بۆ دەستپێکردن!", total_earnings_label: "کۆی گشتی داهات", earnings_chart_title: "داهاتی مانگانە", modal_new_project: "پڕۆژەی نوێ", modal_edit_project: "دەستکاریکردنی پڕۆژە", modal_project_title: "ناونیشانی پڕۆژە", modal_amount: "بڕی پارە ($)", modal_due_date: "بەرواری کۆتایی", status_in_progress: "لە جێبەجێکردندایە", status_completed: "تەواوبووە", status_on_hold: "ڕاگیراوە", add_project_button: "زیادکردنی پڕۆژە", save_changes_button: "پاشەکەوتکردن", delete_modal_title: "دڵنیایت لە سڕینەوە؟", cancel_button: "پاشگەزبوونەوە", delete_button: "سڕینەوە", card_due_label: "کاتی کۆتایی:", card_no_date: "بێ بەروار", no_file_chosen: "هیچ فایلێک هەڵنەبژێردراوە", choose_file_button: "فایل هەڵبژێرە", nav_explore: "گەڕان", nav_charts: "چارتەکان", nav_settings: "ڕێکخستنەکان", nav_profile: "پڕۆفایل", profile_total_projects: "کۆی پڕۆژەکان", profile_completed: "تەواوبوو", profile_avg_value: "تێکڕای بەهای پڕۆژە", login_title: "چوونەژوورەوە", auth_email: "ئیمەیڵ", auth_password: "وشەی نهێنی", login_button: "چوونەژوورەوە", no_account: "هەژمارت نییە؟", register_link: "هەژمار دروست بکە", register_title: "هەژمار دروست بکە", register_button: "هەژمار دروست بکە", has_account: "پێشتر هەژمارت هەیە؟", login_link: "چوونەژوورەوە", sign_out_button: "چوونەدەرەوە", profile_member_since: "ئەندامە لە", forgot_password_link: "وشەی نهێنیت لەبیرچووە؟", forgot_password_title: "دانانەوەی وشەی نهێنی", forgot_password_instructions: "ئیمەیڵەکەت بنووسە بۆ وەرگرتنی لینکی دانانەوەی وشەی نهێنی.", reset_button: "ناردنی لینک", back_to_login: "گەڕانەوە بۆ چوونەژوورەوە", auth_full_name: "ناوی تەواو", auth_confirm_password: "دووبارە نووسینەوەی وشەی نهێنی", settings_theme_title: "شێواز", settings_dark_mode: "شێوازی تاریک", settings_categories_title: "بەڕێوەبردنی بەشەکان", settings_add_category_placeholder: "ناوی بەشی نوێ...", add_button: "زیادکردن", toast_login_success: "بەخێربێیتەوە!", toast_register_success: "هەژمارەکەت بە سەرکەوتوویی دروستکرا!", toast_project_added: "پڕۆژەکە زیادکرا!", toast_project_updated: "پڕۆژەکە نوێکرایەوە!", toast_project_deleted: "پڕۆژەکە سڕایەوە!", toast_category_added: "بەشەکە زیادکرا!", toast_category_deleted: "بەشەکە سڕایەوە!", toast_reset_sent: "لینکی دانانەوەی وشەی نهێنی بۆ ئیمەیڵەکەت نێردرا!", toast_error: "هەڵەیەک ڕوویدا." }
         };
 
-        // The rest of your application logic remains the same...
-        // ... (all the code from `let chartInstance...` to the end)
         let chartInstance, currentLanguage = 'en', allProjects = [], userCategories = [];
+        let projectsDbRef, categoriesDbRef;
         let state = { searchTerm: '', sortBy: 'createdAt', sortDirection: 'desc', filterByCategory: 'all', activeTab: 'explore', currentUserId: null };
         
         const dom = {
