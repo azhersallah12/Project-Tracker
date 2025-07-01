@@ -1,4 +1,6 @@
-# This is the official, recommended workflow for deploying to GitHub Pages
+# WARNING: This workflow contains hardcoded secret keys and is NOT secure.
+# It is recommended to use GitHub Secrets instead.
+
 name: Deploy to GitHub Pages
 
 on:
@@ -15,8 +17,7 @@ permissions:
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+# Allow only one concurrent deployment
 concurrency:
   group: "pages"
   cancel-in-progress: false
@@ -29,20 +30,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       
-      - name: Create Firebase Config File
+      - name: Create Firebase Config File with Hardcoded Keys
         run: |
+          # These commands create the firebase-config.js file using the exact values you provided.
           echo "export const firebaseConfig = {" > firebase-config.js
-          echo "  apiKey: '${{ secrets.FIREBASE_API_KEY }}'," >> firebase-config.js
-          echo "  authDomain: '${{ secrets.FIREBASE_AUTH_DOMAIN }}'," >> firebase-config.js
-          echo "  databaseURL: '${{ secrets.FIREBASE_DATABASE_URL }}'," >> firebase-config.js
-          echo "  projectId: '${{ secrets.FIREBASE_PROJECT_ID }}'," >> firebase-config.js
-          echo "  storageBucket: '${{ secrets.FIREBASE_STORAGE_BUCKET }}'," >> firebase-config.js
-          echo "  messagingSenderId: '${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}'," >> firebase-config.js
-          echo "  appId: '${{ secrets.FIREBASE_APP_ID }}'," >> firebase-config.js
-          echo "  measurementId: '${{ secrets.FIREBASE_MEASUREMENT_ID }}'" >> firebase-config.js
+          echo "  apiKey: 'AIzaSyD5OsLRbBc8l5PXWw9vozwdye96FarFDIE'," >> firebase-config.js
+          echo "  authDomain: 'project-tracker-22bc4.firebaseapp.com'," >> firebase-config.js
+          echo "  databaseURL: 'https://project-tracker-22bc4-default-rtdb.firebaseio.com'," >> firebase-config.js
+          echo "  projectId: 'project-tracker-22bc4'," >> firebase-config.js
+          echo "  storageBucket: 'project-tracker-22bc4.appspot.com'," >> firebase-config.js
+          echo "  messagingSenderId: '147357551717'," >> firebase-config.js
+          echo "  appId: '1:147357551717:web:472f8dca4d1ab67085ca8c'," >> firebase-config.js
+          echo "  measurementId: 'G-5TKFL1SY7D'" >> firebase-config.js
           echo "};" >> firebase-config.js
           
       - name: Replace reCAPTCHA Key in HTML
+        # You still need to use a secret for your reCAPTCHA key
         run: sed -i "s|YOUR_RECAPTCHA_V3_SITE_KEY|${{ secrets.RECAPTCHA_SITE_KEY }}|g" index.html
         
       - name: Setup Pages
