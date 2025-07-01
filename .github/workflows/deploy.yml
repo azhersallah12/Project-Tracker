@@ -6,7 +6,7 @@ on:
     branches:
       - main
 
-# ADDS THE NECESSARY PERMISSIONS FOR THE JOB
+# Adds the necessary permissions for the job
 permissions:
   contents: read
   pages: write
@@ -52,3 +52,5 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           # The directory to publish. It contains your index.html and the newly created firebase-config.js
           publish_dir: ./
+          # NEW LINE: This will force the push and overwrite the existing gh-pages branch history
+          force_orphan: true
