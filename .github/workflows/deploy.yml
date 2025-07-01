@@ -1,1 +1,48 @@
+name: Deploy to GitHub Pages
 
+on:
+  # This workflow runs automatically whenever you push code to your "main" branch
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    # This job runs on a fresh virtual machine provided by GitHub
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1: Checks out your repository's code so the workflow can access it
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
+
+      # Step 2: Creates the firebase-config.js file using your secrets
+      - name: Create Firebase Config File 🔑
+        run: |
+          # This command creates a new file named firebase-config.js
+          # Then, it writes your configuration into it, pulling the values
+          # from the secrets you stored in your GitHub repository settings.
+          echo "export const firebaseConfig = {" > firebase-config.js
+          echo "  apiKey: '${{ secrets.FIREBASE_API_KEY }}'," >> firebase-config.js
+          echo "  authDomain: '${{ secrets.FIREBASE_AUTH_DOMAIN }}'," >> firebase-config.js
+          echo "  databaseURL: '${{ secrets.FIREBASE_DATABASE_URL }}'," >> firebase-config.js
+          echo "  projectId: '${{ secrets.FIREBASE_PROJECT_ID }}'," >> firebase-config.js
+          echo "  storageBucket: '${{ secrets.FIREBASE_STORAGE_BUCKET }}'," >> firebase-config.js
+          echo "  messagingSenderId: '${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}'," >> firebase-config.js
+          echo "  appId: '${{ secrets.FIREBASE_APP_ID }}'," >> firebase-config.js
+          echo "  measurementId: '${{ secrets.FIREBASE_MEASUREMENT_ID }}'" >> firebase-config.js
+          echo "};" >> firebase-config.js
+
+      # Step 3: Replaces the reCAPTCHA key placeholder in your main HTML file
+      - name: Replace reCAPTCHA Key in HTML
+        # This command finds the placeholder 'YOUR_RECAPTCHA_V3_SITE_KEY' in your index.html
+        # and replaces it with the actual key from your GitHub secrets.
+        run: sed -i "s|YOUR_RECAPTCHA_V3_SITE_KEY|${{ secrets.RECAPTCHA_SITE_KEY }}|g" index.html
+
+      # Step 4: Deploys the final code to your GitHub Pages website
+      - name: Deploy 🚀
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          # A special token provided by GitHub to allow this script to push code
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # The directory to publish. It contains your index.html and the newly created firebase-config.js
+          publish_dir: ./
