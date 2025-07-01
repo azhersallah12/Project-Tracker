@@ -6,6 +6,12 @@ on:
     branches:
       - main
 
+# ADDS THE NECESSARY PERMISSIONS FOR THE JOB
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   build-and-deploy:
     # This job runs on a fresh virtual machine provided by GitHub
