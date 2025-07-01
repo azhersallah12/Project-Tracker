@@ -1,9 +1,831 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta http-equiv="refresh" content="0; url=https://project-tracker-22bc4.web.app/" />
-    <title>Redirecting...</title>
-  </head>
-  <body>
-  </body>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Dashboard</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@100..900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class', // Enable class-based dark mode
+        }
+    </script>
+
+    <style>
+        :root {
+            --bg-primary-light: #f1f5f9;
+            --bg-secondary-light: #ffffff;
+            --text-primary-light: #1e293b;
+            --text-secondary-light: #64748b;
+            --border-light: #e2e8f0;
+
+            --bg-primary-dark: #1a1c1e;
+            --bg-secondary-dark: #2f3033;
+            --text-primary-dark: #f1f5f9;
+            --text-secondary-dark: #94a3b8;
+            --border-dark: #475569;
+        }
+        
+        body {
+            font-family: 'Noto Kufi Arabic', sans-serif;
+            background-color: var(--bg-primary-light);
+            color: var(--text-primary-light);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .dark body {
+            background-color: var(--bg-primary-dark);
+            color: var(--text-primary-dark);
+        }
+
+        .bg-primary { background-color: var(--bg-primary-light); }
+        .dark .bg-primary { background-color: var(--bg-primary-dark); }
+        .bg-secondary { background-color: var(--bg-secondary-light); }
+        .dark .bg-secondary { background-color: var(--bg-secondary-dark); }
+        .text-primary { color: var(--text-primary-light); }
+        .dark .text-primary { color: var(--text-primary-dark); }
+        .text-secondary { color: var(--text-secondary-light); }
+        .dark .text-secondary { color: var(--text-secondary-dark); }
+        .border-color { border-color: var(--border-light); }
+        .dark .border-color { border-color: var(--border-dark); }
+
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeOut {
+            to { opacity: 0; transform: translateY(10px); }
+        }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        .animate-fade-out { animation: fadeOut 0.4s ease-out forwards; }
+
+        .custom-file-input { display: none; }
+        .filter-chip { transition: background-color 0.2s, color 0.2s; }
+        .filter-chip.active { background-color: #3b82f6; color: white; }
+        .dark .filter-chip.active { background-color: #a8c7fa; color: #0c315a; }
+        
+        input[type="date"] { color-scheme: light; }
+        .dark input[type="date"] { color-scheme: dark; }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #3b82f6;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            animation: spin 1s linear infinite;
+        }
+        .dark .spinner { border-left-color: #fff; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .nav-bar { box-shadow: 0 -4px 12px rgba(0,0,0,0.1); }
+        .dark .nav-bar { box-shadow: 0 -4px 12px rgba(0,0,0,0.2); }
+
+        .nav-item { transition: color 0.2s; }
+        .nav-item.active { color: #22c55e; }
+        .nav-item.active .nav-text { font-weight: 600; }
+        
+        .customP { padding-bottom: 120px !important; }
+
+        /* Toast Notification */
+        #toast-container {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 100;
+        }
+        .toast {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            margin-bottom: 1rem;
+            transform: translateX(120%);
+            transition: transform 0.4s ease-in-out;
+        }
+        .toast.show {
+            transform: translateX(0);
+        }
+        .toast.success { background-color: #22c55e; color: white; }
+        .toast.error { background-color: #ef4444; color: white; }
+        .toast.info { background-color: #3b82f6; color: white; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div id="toast-container"></div>
+
+    <div id="loading-screen" class="fixed inset-0 bg-primary flex items-center justify-center z-50">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- AUTHENTICATION CONTAINER -->
+    <div id="auth-container" class="hidden min-h-screen flex items-center justify-center p-4 bg-primary">
+        <div class="w-full max-w-md">
+            <div id="auth-card" class="bg-secondary rounded-2xl p-8 shadow-xl animate-fade-in">
+                <!-- Login, Register, Forgot Password Forms will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="app-container" class="hidden relative min-h-screen flex-col">
+        <header class="p-4 sm:p-6 lg:p-8 mb-6 flex justify-between items-center">
+            <h1 id="header-title" class="text-2xl font-bold text-primary tracking-tight">Dashboard</h1>
+            <div class="relative">
+                <select id="language-switcher" class="bg-secondary text-primary rounded-full py-2 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none">
+                    <option value="en">English</option>
+                    <option value="ar">العربية</option>
+                    <option value="ku">کوردی (سۆرانی)</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
+                    <svg class="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+            </div>
+        </header>
+
+        <main class="p-4 sm:p-6 lg:p-8 pt-0 flex-grow customP">
+            <!-- TAB VIEWS -->
+            <div id="explore-view" class="tab-view">
+                <div class="space-y-8">
+                    <div class="bg-secondary p-4 rounded-2xl">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="relative">
+                                 <input type="search" id="search-input" data-key-placeholder="search_placeholder" class="w-full bg-primary text-primary rounded-full py-3 pl-12 pr-4 rtl:pr-12 rtl:pl-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                 <div class="absolute inset-y-0 left-0 rtl:left-auto rtl:right-0 flex items-center pl-4 rtl:pl-0 rtl:pr-4 pointer-events-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-secondary"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                 </div>
+                            </div>
+                            <div class="flex items-center gap-2 overflow-x-auto pb-2">
+                                 <select id="category-filter" class="bg-primary text-primary rounded-full py-3 px-5 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none">
+                                    <option value="all" data-key="cat_all">All Categories</option>
+                                    <!-- Dynamic categories will be added here -->
+                                 </select>
+                            </div>
+                        </div>
+                         <div class="mt-4 flex flex-wrap gap-2">
+                            <span class="text-sm text-secondary self-center mr-2 rtl:mr-0 rtl:ml-2" data-key="sort_by">Sort by:</span>
+                            <button class="filter-chip active py-1.5 px-4 rounded-full text-sm font-medium bg-slate-200 dark:bg-slate-700" data-sort="createdAt" data-key="sort_date">Date Added</button>
+                            <button class="filter-chip py-1.5 px-4 rounded-full text-sm font-medium bg-slate-200 dark:bg-slate-700" data-sort="title" data-key="sort_name">Name</button>
+                            <button class="filter-chip py-1.5 px-4 rounded-full text-sm font-medium bg-slate-200 dark:bg-slate-700" data-sort="amount" data-key="sort_amount">Amount</button>
+                            <button class="filter-chip py-1.5 px-4 rounded-full text-sm font-medium bg-slate-200 dark:bg-slate-700" data-sort="dueDate" data-key="sort_due_date">Due Date</button>
+                        </div>
+                    </div>
+                    <div id="project-list" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                       <div id="empty-state" class="hidden text-slate-500 md:col-span-2 text-center py-16">
+                            <p class="text-lg" data-key="empty_state_title">No projects found.</p>
+                            <p class="text-sm" data-key="empty_state_subtitle">Add your first project to get started!</p>
+                       </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="charts-view" class="tab-view hidden">
+                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="lg:col-span-2 space-y-8">
+                        <div class="bg-secondary p-6 rounded-2xl">
+                            <p class="text-secondary text-sm font-medium" data-key="total_earnings_label">Total Earnings</p>
+                            <p id="total-earnings" class="text-4xl font-bold text-primary tracking-tight mt-1">$0.00</p>
+                        </div>
+                        <div class="bg-secondary p-6 rounded-2xl">
+                            <h3 class="font-bold text-lg text-primary mb-4" data-key="earnings_chart_title">Earnings by Month</h3>
+                            <div class="relative h-96"> <canvas id="earnings-chart"></canvas> </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="profile-view" class="tab-view hidden">
+                <div class="bg-secondary p-6 sm:p-8 rounded-2xl max-w-2xl mx-auto">
+                    <div class="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-6">
+                        <img id="profile-avatar" src="https://placehold.co/128x128/1a1c1e/a8c7fa?text=U" alt="User Avatar" class="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-slate-600">
+                        <div class="flex-grow">
+                            <h2 id="profile-name" class="text-3xl font-bold text-primary">User Name</h2>
+                            <p id="profile-email" class="text-secondary break-all">user.name@example.com</p>
+                        </div>
+                    </div>
+                    <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                        <div class="bg-primary p-4 rounded-xl">
+                            <p class="text-sm text-secondary" data-key="profile_total_projects">Total Projects</p>
+                            <p id="profile-total-projects" class="text-2xl font-bold text-primary mt-1">0</p>
+                        </div>
+                        <div class="bg-primary p-4 rounded-xl">
+                            <p class="text-sm text-secondary" data-key="profile_completed">Completed</p>
+                            <p id="profile-completed-projects" class="text-2xl font-bold text-primary mt-1">0</p>
+                        </div>
+                        <div class="bg-primary p-4 rounded-xl">
+                            <p class="text-sm text-secondary" data-key="profile_avg_value">Avg. Project Value</p>
+                            <p id="profile-avg-value" class="text-2xl font-bold text-primary mt-1">$0.00</p>
+                        </div>
+                    </div>
+                    <div class="mt-8 border-t border-color pt-6">
+                        <button id="sign-out-btn" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-lg" data-key="sign_out_button">Sign Out</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="settings-view" class="tab-view hidden">
+                 <div class="bg-secondary p-6 sm:p-8 rounded-2xl max-w-2xl mx-auto space-y-8">
+                    <div>
+                        <h3 class="text-xl font-bold text-primary mb-4" data-key="settings_theme_title">Theme</h3>
+                        <div class="flex items-center justify-between bg-primary p-4 rounded-lg">
+                            <span class="font-medium text-primary" data-key="settings_dark_mode">Dark Mode</span>
+                            <label for="theme-toggle" class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="theme-toggle" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                            </label>
+                        </div>
+                    </div>
+                     <div>
+                        <h3 class="text-xl font-bold text-primary mb-4" data-key="settings_categories_title">Manage Categories</h3>
+                        <div class="bg-primary p-4 rounded-lg">
+                            <form id="category-form" class="flex gap-2 mb-4">
+                                <input type="text" id="category-input" class="w-full bg-secondary text-primary rounded-lg px-4 py-2" data-key-placeholder="settings_add_category_placeholder" required>
+                                <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-lg" data-key="add_button">Add</button>
+                            </form>
+                            <ul id="category-list" class="space-y-2">
+                                <!-- User categories will be listed here -->
+                            </ul>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+        </main>
+
+        <footer class="fixed bottom-0 left-0 right-0 h-20 nav-bar z-40 bg-secondary">
+            <div class="flex justify-around items-center h-full max-w-lg mx-auto relative">
+                <a href="#" class="nav-item flex flex-col items-center gap-1 text-secondary w-16" data-tab="explore"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 7-4-4-4 4M17 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="M12 18v3"></path><path d="M10 21h4"></path></svg><span class="text-xs nav-text" data-key="nav_explore">Explore</span></a>
+                <a href="#" class="nav-item flex flex-col items-center gap-1 text-secondary w-16" data-tab="charts"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path></svg><span class="text-xs nav-text" data-key="nav_charts">Charts</span></a>
+                <div class="w-16 h-16"></div>
+                <a href="#" class="nav-item flex flex-col items-center gap-1 text-secondary w-16" data-tab="settings"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 0 2l-.15.08a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1 0-2l.15.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg><span class="text-xs nav-text" data-key="nav_settings">Settings</span></a>
+                <a href="#" class="nav-item flex flex-col items-center gap-1 text-secondary w-16" data-tab="profile"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg><span class="text-xs nav-text" data-key="nav_profile">Profile</span></a>
+                <button id="add-project-btn-nav" class="absolute left-1/2 -translate-x-1/2 -top-8 bg-[#22c55e] text-white font-bold w-16 h-16 rounded-full flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modals -->
+    <div id="project-modal" class="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-secondary rounded-2xl shadow-xl w-full max-w-md animate-fade-in" id="modal-content">
+            <form id="project-form" class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 id="modal-title" class="text-2xl font-bold text-primary">New Project</h3>
+                    <button type="button" id="close-modal-btn" class="text-secondary hover:text-primary text-3xl leading-none">&times;</button>
+                </div>
+                <input type="hidden" id="project-id">
+                <div class="space-y-4">
+                    <input type="text" id="project-title" class="w-full bg-primary rounded-lg px-4 py-3 text-primary focus:ring-2 focus:ring-blue-500" data-key-placeholder="modal_project_title" required>
+                    <input type="number" id="project-amount" min="0" step="0.01" class="w-full bg-primary rounded-lg px-4 py-3 text-primary" data-key-placeholder="modal_amount" required>
+                    <input type="date" id="project-due-date" class="w-full bg-primary rounded-lg px-4 py-3 text-secondary" data-key-placeholder="modal_due_date">
+                    <div class="grid grid-cols-2 gap-4">
+                        <select id="project-status" class="w-full bg-primary rounded-lg px-4 py-3 text-primary" required><option value="In Progress" data-key="status_in_progress"></option><option value="Completed" data-key="status_completed"></option><option value="On Hold" data-key="status_on_hold"></option></select>
+                        <select id="project-category" class="w-full bg-primary rounded-lg px-4 py-3 text-primary" required>
+                            <!-- Dynamic categories here -->
+                        </select>
+                    </div>
+                    <div class="bg-primary rounded-lg p-4 flex items-center justify-between">
+                        <span id="file-name-display" class="text-sm text-secondary truncate pr-4" data-key="no_file_chosen">No file chosen</span>
+                        <label for="project-image" class="cursor-pointer bg-slate-600 hover:bg-slate-500 text-white font-semibold py-2 px-4 rounded-lg text-sm" data-key="choose_file_button">Choose File</label>
+                        <input id="project-image" type="file" accept="image/*" class="custom-file-input">
+                    </div>
+                </div>
+                <button type="submit" id="form-submit-btn" class="w-full mt-8 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg flex items-center justify-center"></button>
+            </form>
+        </div>
+    </div>
+    <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-secondary rounded-2xl shadow-xl w-full max-w-sm p-6 animate-fade-in text-center">
+            <h3 class="text-xl font-bold text-primary mb-2" data-key="delete_modal_title">Delete Project?</h3>
+            <div class="flex justify-center gap-4 mt-6">
+                <button id="cancel-delete-btn" class="w-full bg-slate-500 hover:bg-slate-400 font-bold py-2 rounded-lg" data-key="cancel_button">Cancel</button>
+                <button id="confirm-delete-btn" class="w-full bg-red-600 hover:bg-red-500 font-bold py-2 rounded-lg" data-key="delete_button">Delete</button>
+            </div>
+        </div>
+    </div>
+    <div id="image-viewer-modal" class="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
+        <button id="close-viewer-btn" class="absolute top-4 right-4 text-white text-5xl leading-none cursor-pointer z-10">&times;</button>
+        <img id="fullscreen-image" src="" alt="Full screen project image" class="max-w-full max-h-full rounded-lg shadow-2xl">
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getDatabase, ref, onValue, set, push, remove, off } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, updateProfile } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5OsLRbBc8l5PXWw9vozwdye96FarFDIE",
+            authDomain: "project-tracker-22bc4.firebaseapp.com",
+            databaseURL: "https://project-tracker-22bc4-default-rtdb.firebaseio.com",
+            projectId: "project-tracker-22bc4",
+            storageBucket: "project-tracker-22bc4.appspot.com",
+            messagingSenderId: "147357551717",
+            appId: "1:147357551717:web:472f8dca4d1ab67085ca8c",
+            measurementId: "G-5TKFL1SY7D"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+        
+        const translations = {
+            en: { dashboard_title: "Dashboard", charts_title: "Charts", profile_title: "Profile", settings_title: "Settings", search_placeholder: "Search projects...", cat_all: "All Categories", sort_by: "Sort by:", sort_date: "Date Added", sort_name: "Name", sort_amount: "Amount", sort_due_date: "Due Date", empty_state_title: "No projects found.", empty_state_subtitle: "Add your first project to get started!", total_earnings_label: "Total Earnings", earnings_chart_title: "Earnings by Month", modal_new_project: "New Project", modal_edit_project: "Edit Project", modal_project_title: "Project Title", modal_amount: "Amount ($)", modal_due_date: "Due Date", status_in_progress: "In Progress", status_completed: "Completed", status_on_hold: "On Hold", add_project_button: "Add Project", save_changes_button: "Save Changes", delete_modal_title: "Delete Project?", cancel_button: "Cancel", delete_button: "Delete", card_due_label: "Due:", card_no_date: "No date", no_file_chosen: "No file chosen", choose_file_button: "Choose File", nav_explore: "Explore", nav_charts: "Charts", nav_settings: "Settings", nav_profile: "Profile", profile_total_projects: "Total Projects", profile_completed: "Completed", profile_avg_value: "Avg. Project Value", login_title: "Login", auth_email: "Email", auth_password: "Password", login_button: "Login", no_account: "Don't have an account?", register_link: "Register", register_title: "Create Account", register_button: "Register", has_account: "Already have an account?", login_link: "Login", sign_out_button: "Sign Out", profile_member_since: "Member since", forgot_password_link: "Forgot Password?", forgot_password_title: "Reset Password", forgot_password_instructions: "Enter your email to receive a password reset link.", reset_button: "Send Reset Link", back_to_login: "Back to Login", auth_full_name: "Full Name", auth_confirm_password: "Confirm Password", settings_theme_title: "Theme", settings_dark_mode: "Dark Mode", settings_categories_title: "Manage Categories", settings_add_category_placeholder: "New category name...", add_button: "Add", toast_login_success: "Welcome back!", toast_register_success: "Account created successfully!", toast_project_added: "Project added!", toast_project_updated: "Project updated!", toast_project_deleted: "Project deleted!", toast_category_added: "Category added!", toast_category_deleted: "Category deleted!", toast_reset_sent: "Password reset email sent!", toast_error: "An error occurred." },
+            ar: { dashboard_title: "لوحة التحكم", charts_title: "الرسوم البيانية", profile_title: "الملف الشخصي", settings_title: "الإعدادات", search_placeholder: "ابحث عن المشاريع...", cat_all: "كل الفئات", sort_by: "فرز حسب:", sort_date: "تاريخ الإضافة", sort_name: "الاسم", sort_amount: "المبلغ", sort_due_date: "تاريخ الاستحقاق", empty_state_title: "لم يتم العثور على مشاريع.", empty_state_subtitle: "أضف مشروعك الأول للبدء!", total_earnings_label: "إجمالي الأرباح", earnings_chart_title: "الأرباح حسب الشهر", modal_new_project: "مشروع جديد", modal_edit_project: "تعديل المشروع", modal_project_title: "عنوان المشروع", modal_amount: "المبلغ ($)", modal_due_date: "تاريخ الاستحقاق", status_in_progress: "قيد التنفيذ", status_completed: "مكتمل", status_on_hold: "معلق", add_project_button: "إضافة مشروع", save_changes_button: "حفظ التغييرات", delete_modal_title: "هل تريد حذف المشروع؟", cancel_button: "إلغاء", delete_button: "حذف", card_due_label: "مستحق:", card_no_date: "لا يوجد تاريخ", no_file_chosen: "لم يتم اختيار ملف", choose_file_button: "اختر ملف", nav_explore: "استكشاف", nav_charts: "الرسوم", nav_settings: "الإعدادات", nav_profile: "الملف الشخصي", profile_total_projects: "إجمالي المشاريع", profile_completed: "مكتمل", profile_avg_value: "متوسط قيمة المشروع", login_title: "تسجيل الدخول", auth_email: "البريد الإلكتروني", auth_password: "كلمة المرور", login_button: "تسجيل الدخول", no_account: "ليس لديك حساب؟", register_link: "إنشاء حساب", register_title: "إنشاء حساب", register_button: "إنشاء حساب", has_account: "لديك حساب بالفعل؟", login_link: "تسجيل الدخول", sign_out_button: "تسجيل الخروج", profile_member_since: "عضو منذ", forgot_password_link: "نسيت كلمة المرور؟", forgot_password_title: "إعادة تعيين كلمة المرور", forgot_password_instructions: "أدخل بريدك الإلكتروني لتلقي رابط إعادة تعيين كلمة المرور.", reset_button: "إرسال الرابط", back_to_login: "العودة لتسجيل الدخول", auth_full_name: "الاسم الكامل", auth_confirm_password: "تأكيد كلمة المرور", settings_theme_title: "المظهر", settings_dark_mode: "الوضع الداكن", settings_categories_title: "إدارة الفئات", settings_add_category_placeholder: "اسم فئة جديد...", add_button: "إضافة", toast_login_success: "مرحبا بعودتك!", toast_register_success: "تم إنشاء الحساب بنجاح!", toast_project_added: "تمت إضافة المشروع!", toast_project_updated: "تم تحديث المشروع!", toast_project_deleted: "تم حذف المشروع!", toast_category_added: "تمت إضافة الفئة!", toast_category_deleted: "تم حذف الفئة!", toast_reset_sent: "تم إرسال بريد إعادة تعيين كلمة المرور!", toast_error: "حدث خطأ ما." },
+            ku: { dashboard_title: "داشبۆرد", charts_title: "چارتەکان", profile_title: "پڕۆفایل", settings_title: "ڕێکخستنەکان", search_placeholder: "گەڕان بۆ پڕۆژە...", cat_all: "هەمووی", sort_by: "ڕیزکردن بەپێی:", sort_date: "بەرواری زیادکردن", sort_name: "ناو", sort_amount: "بڕ", sort_due_date: "بەرواری کۆتایی", empty_state_title: "هیچ پڕۆژەیەک نەدۆزرایەوە.", empty_state_subtitle: "یەکەم پڕۆژەی خۆت زیاد بکە بۆ دەستپێکردن!", total_earnings_label: "کۆی گشتی داهات", earnings_chart_title: "داهاتی مانگانە", modal_new_project: "پڕۆژەی نوێ", modal_edit_project: "دەستکاریکردنی پڕۆژە", modal_project_title: "ناونیشانی پڕۆژە", modal_amount: "بڕی پارە ($)", modal_due_date: "بەرواری کۆتایی", status_in_progress: "لە جێبەجێکردندایە", status_completed: "تەواوبووە", status_on_hold: "ڕاگیراوە", add_project_button: "زیادکردنی پڕۆژە", save_changes_button: "پاشەکەوتکردن", delete_modal_title: "دڵنیایت لە سڕینەوە؟", cancel_button: "پاشگەزبوونەوە", delete_button: "سڕینەوە", card_due_label: "کاتی کۆتایی:", card_no_date: "بێ بەروار", no_file_chosen: "هیچ فایلێک هەڵنەبژێردراوە", choose_file_button: "فایل هەڵبژێرە", nav_explore: "گەڕان", nav_charts: "چارتەکان", nav_settings: "ڕێکخستنەکان", nav_profile: "پڕۆفایل", profile_total_projects: "کۆی پڕۆژەکان", profile_completed: "تەواوبوو", profile_avg_value: "تێکڕای بەهای پڕۆژە", login_title: "چوونەژوورەوە", auth_email: "ئیمەیڵ", auth_password: "وشەی نهێنی", login_button: "چوونەژوورەوە", no_account: "هەژمارت نییە؟", register_link: "هەژمار دروست بکە", register_title: "هەژمار دروست بکە", register_button: "هەژمار دروست بکە", has_account: "پێشتر هەژمارت هەیە؟", login_link: "چوونەژوورەوە", sign_out_button: "چوونەدەرەوە", profile_member_since: "ئەندامە لە", forgot_password_link: "وشەی نهێنیت لەبیرچووە؟", forgot_password_title: "دانانەوەی وشەی نهێنی", forgot_password_instructions: "ئیمەیڵەکەت بنووسە بۆ وەرگرتنی لینکی دانانەوەی وشەی نهێنی.", reset_button: "ناردنی لینک", back_to_login: "گەڕانەوە بۆ چوونەژوورەوە", auth_full_name: "ناوی تەواو", auth_confirm_password: "دووبارە نووسینەوەی وشەی نهێنی", settings_theme_title: "شێواز", settings_dark_mode: "شێوازی تاریک", settings_categories_title: "بەڕێوەبردنی بەشەکان", settings_add_category_placeholder: "ناوی بەشی نوێ...", add_button: "زیادکردن", toast_login_success: "بەخێربێیتەوە!", toast_register_success: "هەژمارەکەت بە سەرکەوتوویی دروستکرا!", toast_project_added: "پڕۆژەکە زیادکرا!", toast_project_updated: "پڕۆژەکە نوێکرایەوە!", toast_project_deleted: "پڕۆژەکە سڕایەوە!", toast_category_added: "بەشەکە زیادکرا!", toast_category_deleted: "بەشەکە سڕایەوە!", toast_reset_sent: "لینکی دانانەوەی وشەی نهێنی بۆ ئیمەیڵەکەت نێردرا!", toast_error: "هەڵەیەک ڕوویدا." }
+        };
+
+        let chartInstance, currentLanguage = 'en', allProjects = [], userCategories = [];
+        let projectsDbRef, categoriesDbRef;
+        let state = { searchTerm: '', sortBy: 'createdAt', sortDirection: 'desc', filterByCategory: 'all', activeTab: 'explore', currentUserId: null };
+        
+        const dom = {
+            html: document.documentElement,
+            loadingScreen: document.getElementById('loading-screen'),
+            authContainer: document.getElementById('auth-container'),
+            authCard: document.getElementById('auth-card'),
+            appContainer: document.getElementById('app-container'),
+            signOutBtn: document.getElementById('sign-out-btn'),
+            languageSwitcher: document.getElementById('language-switcher'),
+            headerTitle: document.getElementById('header-title'),
+            projectList: document.getElementById('project-list'),
+            totalEarningsEl: document.getElementById('total-earnings'),
+            emptyState: document.getElementById('empty-state'),
+            addProjectBtnNav: document.getElementById('add-project-btn-nav'),
+            projectModal: document.getElementById('project-modal'),
+            deleteModal: document.getElementById('delete-modal'),
+            closeModalBtn: document.getElementById('close-modal-btn'),
+            cancelDeleteBtn: document.getElementById('cancel-delete-btn'),
+            confirmDeleteBtn: document.getElementById('confirm-delete-btn'),
+            projectForm: document.getElementById('project-form'),
+            searchInput: document.getElementById('search-input'),
+            categoryFilter: document.getElementById('category-filter'),
+            modalTitle: document.getElementById('modal-title'),
+            formSubmitBtn: document.getElementById('form-submit-btn'),
+            projectIdInput: document.getElementById('project-id'),
+            projectImageInput: document.getElementById('project-image'),
+            fileNameDisplay: document.getElementById('file-name-display'),
+            dueDateInput: document.getElementById('project-due-date'),
+            projectCategorySelect: document.getElementById('project-category'),
+            imageViewerModal: document.getElementById('image-viewer-modal'),
+            closeViewerBtn: document.getElementById('close-viewer-btn'),
+            fullscreenImage: document.getElementById('fullscreen-image'),
+            navItems: document.querySelectorAll('.nav-item'),
+            tabViews: document.querySelectorAll('.tab-view'),
+            profileName: document.getElementById('profile-name'),
+            profileEmail: document.getElementById('profile-email'),
+            profileAvatar: document.getElementById('profile-avatar'),
+            profileTotalProjects: document.getElementById('profile-total-projects'),
+            profileCompletedProjects: document.getElementById('profile-completed-projects'),
+            profileAvgValue: document.getElementById('profile-avg-value'),
+            themeToggle: document.getElementById('theme-toggle'),
+            categoryForm: document.getElementById('category-form'),
+            categoryInput: document.getElementById('category-input'),
+            categoryList: document.getElementById('category-list'),
+            toastContainer: document.getElementById('toast-container'),
+        };
+
+        // --- Utility & UI Functions ---
+        const showToast = (key, type = 'info') => {
+            const t = translations[currentLanguage];
+            const message = t[key] || t['toast_error'];
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            dom.toastContainer.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                toast.addEventListener('transitionend', () => toast.remove());
+            }, 3000);
+        };
+        
+        const setLanguage = (lang) => {
+            currentLanguage = lang;
+            const t = translations[lang];
+            document.querySelectorAll('[data-key]').forEach(el => el.textContent = t[el.dataset.key]);
+            document.querySelectorAll('[data-key-placeholder]').forEach(el => el.placeholder = t[el.dataset.keyPlaceholder]);
+            dom.html.setAttribute('dir', (lang === 'ar' || lang === 'ku') ? 'rtl' : 'ltr');
+            localStorage.setItem('projectTrackerLang', lang);
+            dom.languageSwitcher.value = lang;
+            if(state.currentUserId) renderAll();
+        };
+
+        const applyTheme = (theme) => {
+            localStorage.setItem('theme', theme);
+            dom.themeToggle.checked = theme === 'dark';
+            if (theme === 'dark') {
+                dom.html.classList.add('dark');
+            } else {
+                dom.html.classList.remove('dark');
+            }
+        };
+        
+        // --- Auth UI & Logic ---
+        const renderAuthForm = (formType) => {
+            const t = translations[currentLanguage];
+            let formHtml;
+            if (formType === 'login') {
+                formHtml = `
+                    <form id="login-form">
+                        <h2 class="text-3xl font-bold text-primary text-center mb-6" data-key="login_title">${t.login_title}</h2>
+                        <div id="auth-error" class="text-red-400 text-sm mb-4 text-center hidden"></div>
+                        <div class="space-y-4">
+                            <input type="email" id="auth-email" class="w-full bg-primary rounded-lg px-4 py-3 text-primary" data-key-placeholder="auth_email" placeholder="${t.auth_email}" required>
+                            <input type="password" id="auth-password" class="w-full bg-primary rounded-lg px-4 py-3 text-primary" data-key-placeholder="auth_password" placeholder="${t.auth_password}" required>
+                        </div>
+                        <div class="text-right mt-2"><a href="#" data-action="show-forgot" class="text-sm font-semibold text-blue-400 hover:underline" data-key="forgot_password_link">${t.forgot_password_link}</a></div>
+                        <button type="submit" class="w-full mt-6 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg" data-key="login_button">${t.login_button}</button>
+                        <p class="text-center text-sm text-secondary mt-6">
+                            <span data-key="no_account">${t.no_account}</span>
+                            <a href="#" data-action="show-register" class="font-semibold text-blue-400 hover:underline" data-key="register_link">${t.register_link}</a>
+                        </p>
+                    </form>`;
+            } else if (formType === 'register') {
+                formHtml = `
+                    <form id="register-form">
+                        <h2 class="text-3xl font-bold text-primary text-center mb-6" data-key="register_title">${t.register_title}</h2>
+                        <div id="auth-error" class="text-red-400 text-sm mb-4 text-center hidden"></div>
+                        <div class="space-y-4">
+                            <input type="text" id="auth-name" class="w-full bg-primary rounded-lg px-4 py-3 text-primary" data-key-placeholder="auth_full_name" placeholder="${t.auth_full_name}" required>
+                            <input type="email" id="auth-email" class="w-full bg-primary rounded-lg px-4 py-3 text-primary" data-key-placeholder="auth_email" placeholder="${t.auth_email}" required>
+                            <input type="password" id="auth-password" class="w-full bg-primary rounded-lg px-4 py-3 text-primary" data-key-placeholder="auth_password" placeholder="${t.auth_password}" required>
+                            <input type="password" id="auth-confirm-password" class="w-full bg-primary rounded-lg px-4 py-3 text-primary" data-key-placeholder="auth_confirm_password" placeholder="${t.auth_confirm_password}" required>
+                        </div>
+                        <button type="submit" class="w-full mt-8 bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg" data-key="register_button">${t.register_button}</button>
+                        <p class="text-center text-sm text-secondary mt-6">
+                            <span data-key="has_account">${t.has_account}</span>
+                            <a href="#" data-action="show-login" class="font-semibold text-blue-400 hover:underline" data-key="login_link">${t.login_link}</a>
+                        </p>
+                    </form>`;
+            } else { // forgot password
+                formHtml = `
+                     <form id="forgot-form">
+                        <h2 class="text-3xl font-bold text-primary text-center mb-6" data-key="forgot_password_title">${t.forgot_password_title}</h2>
+                        <p class="text-center text-sm text-secondary mb-4" data-key="forgot_password_instructions">${t.forgot_password_instructions}</p>
+                        <div id="auth-error" class="text-red-400 text-sm mb-4 text-center hidden"></div>
+                        <div class="space-y-4">
+                            <input type="email" id="auth-email" class="w-full bg-primary rounded-lg px-4 py-3 text-primary" data-key-placeholder="auth_email" placeholder="${t.auth_email}" required>
+                        </div>
+                        <button type="submit" class="w-full mt-8 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg" data-key="reset_button">${t.reset_button}</button>
+                        <p class="text-center text-sm text-secondary mt-6">
+                            <a href="#" data-action="show-login" class="font-semibold text-blue-400 hover:underline" data-key="back_to_login">${t.back_to_login}</a>
+                        </p>
+                    </form>`;
+            }
+            dom.authCard.innerHTML = formHtml;
+        };
+        
+        const handleAuthFormSubmit = async (e) => {
+            e.preventDefault();
+            const formId = e.target.id;
+            const email = e.target.querySelector('#auth-email').value;
+            const password = e.target.querySelector('#auth-password')?.value;
+            const errorEl = e.target.querySelector('#auth-error');
+            errorEl.classList.add('hidden');
+
+            try {
+                if (formId === 'login-form') {
+                    await signInWithEmailAndPassword(auth, email, password);
+                    showToast('toast_login_success', 'success');
+                } else if (formId === 'register-form') {
+                    const name = e.target.querySelector('#auth-name').value;
+                    const confirmPassword = e.target.querySelector('#auth-confirm-password').value;
+                    if(password !== confirmPassword) throw new Error("Passwords do not match.");
+                    if(!name) throw new Error("Full name is required.");
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    await updateProfile(userCredential.user, { displayName: name });
+                    showToast('toast_register_success', 'success');
+                } else if (formId === 'forgot-form') {
+                    await sendPasswordResetEmail(auth, email);
+                    showToast('toast_reset_sent', 'info');
+                    renderAuthForm('login');
+                }
+            } catch (error) {
+                errorEl.textContent = error.message;
+                errorEl.classList.remove('hidden');
+                showToast(null, 'error');
+            }
+        };
+        
+        // --- Data & App Logic ---
+        const switchTab = (tabName) => {
+            state.activeTab = tabName;
+            dom.tabViews.forEach(view => view.classList.add('hidden'));
+            document.getElementById(`${tabName}-view`).classList.remove('hidden');
+            dom.navItems.forEach(item => item.classList.toggle('active', item.dataset.tab === tabName));
+            const t = translations[currentLanguage];
+            const titleKey = tabName === 'explore' ? 'dashboard_title' : `${tabName}_title`;
+            dom.headerTitle.textContent = t[titleKey] || t['dashboard_title'];
+            if(tabName === 'charts') renderEarningsChart(allProjects);
+            if(tabName === 'profile') renderProfileStats();
+        };
+
+        const renderAll = () => {
+            renderProjects();
+            renderCategories();
+            const totalEarnings = allProjects.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+            dom.totalEarningsEl.textContent = formatCurrency(totalEarnings);
+            switchTab(state.activeTab);
+        };
+
+        const renderProjects = () => {
+            let filtered = allProjects
+                .filter(p => p.title.toLowerCase().includes(state.searchTerm.toLowerCase()) && (state.filterByCategory === 'all' || p.category === state.filterByCategory))
+                .sort((a, b) => {
+                    let valA = a[state.sortBy], valB = b[state.sortBy];
+                    if (state.sortBy === 'title') { valA = valA.toLowerCase(); valB = valB.toLowerCase(); }
+                    let comp = valA > valB ? 1 : (valA < valB ? -1 : 0);
+                    return state.sortDirection === 'desc' ? comp * -1 : comp;
+                });
+            
+            dom.projectList.innerHTML = '';
+            filtered.forEach(p => dom.projectList.appendChild(createProjectCard(p)));
+            dom.emptyState.classList.toggle('hidden', filtered.length > 0);
+        };
+        
+        const createProjectCard = (p) => {
+            const card = document.createElement('div');
+            card.className = 'bg-secondary rounded-2xl shadow-lg overflow-hidden flex flex-col animate-fade-in';
+            const t = translations[currentLanguage];
+            const placeholderImg = `https://placehold.co/400x300/1a1c1e/475569?text=${encodeURIComponent(p.title)}`;
+            const statusColors = { "In Progress": "bg-yellow-500", "Completed": "bg-green-500", "On Hold": "bg-gray-500" };
+            const dueDateText = p.dueDate 
+                ? `${t.card_due_label} ${new Date(p.dueDate + 'T00:00:00').toLocaleDateString(currentLanguage === 'en' ? 'en-US' : 'ar-EG', { year: 'numeric', month: 'short', day: 'numeric' })}`
+                : t.card_no_date;
+
+            card.innerHTML = `
+                <img src="${p.imageBase64 || placeholderImg}" class="h-40 w-full object-cover cursor-pointer" data-action="view-image" onerror="this.src='${placeholderImg}'">
+                <div class="p-4 flex-grow flex flex-col">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-xs font-medium bg-blue-900/50 text-blue-300 py-1 px-2 rounded-full">${p.category || 'N/A'}</span>
+                        <div class="flex items-center gap-2 text-xs text-secondary">
+                            <div class="w-2 h-2 rounded-full ${statusColors[p.status]}"></div>
+                            <span>${t[`status_${p.status.toLowerCase().replace(' ','_')}`]}</span>
+                        </div>
+                    </div>
+                    <h3 class="font-bold text-primary text-lg flex-grow">${p.title}</h3>
+                    <p class="text-sm text-secondary mt-1">${dueDateText}</p>
+                    <div class="mt-4 flex justify-between items-center">
+                        <p class="font-bold text-xl text-green-400">${formatCurrency(p.amount)}</p>
+                        <div class="flex items-center gap-1">
+                            <button data-action="edit" data-id="${p.id}" class="text-secondary p-2 rounded-full hover:bg-primary"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg></button>
+                            <button data-action="delete" data-id="${p.id}" class="text-secondary p-2 rounded-full hover:bg-primary"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                        </div>
+                    </div>
+                </div>`;
+            return card;
+        };
+
+        const renderEarningsChart = (projects) => {
+            const ctx = document.getElementById('earnings-chart').getContext('2d');
+            const monthlyData = projects.reduce((acc, p) => {
+                if (!p.createdAt) return acc;
+                const month = new Date(p.createdAt).toLocaleString('default', { month: 'short', year: '2-digit' });
+                acc[month] = (acc[month] || 0) + parseFloat(p.amount || 0);
+                return acc;
+            }, {});
+            if (chartInstance) chartInstance.destroy();
+            const isDark = dom.html.classList.contains('dark');
+            chartInstance = new Chart(ctx, { type: 'bar', data: { labels: Object.keys(monthlyData), datasets: [{ data: Object.values(monthlyData), backgroundColor: isDark ? '#a8c7fa' : '#3b82f6', borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, animation: false, scales: { y: { beginAtZero: true, ticks: { color: isDark ? '#94a3b8' : '#64748b' }, grid: { color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' } }, x: { ticks: { color: isDark ? '#94a3b8' : '#64748b' }, grid: { display: false } } }, plugins: { legend: { display: false } } } });
+        };
+        
+        const renderProfileStats = () => {
+            const user = auth.currentUser;
+            if(!user) return;
+            dom.profileName.textContent = user.displayName || 'User';
+            dom.profileEmail.textContent = user.email;
+            dom.profileAvatar.src = user.photoURL || `https://placehold.co/128x128/${dom.html.classList.contains('dark') ? '1a1c1e/a8c7fa' : 'e0e7ff/4338ca'}?text=${(user.displayName || 'U').charAt(0).toUpperCase()}`;
+            const totalProjects = allProjects.length;
+            const completedProjects = allProjects.filter(p => p.status === 'Completed').length;
+            const totalValue = allProjects.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+            const avgValue = totalProjects > 0 ? totalValue / totalProjects : 0;
+            dom.profileTotalProjects.textContent = totalProjects;
+            dom.profileCompletedProjects.textContent = completedProjects;
+            dom.profileAvgValue.textContent = formatCurrency(avgValue);
+        };
+
+        const renderCategories = () => {
+            const t = translations[currentLanguage];
+            // Render list in settings
+            dom.categoryList.innerHTML = '';
+            userCategories.forEach(cat => {
+                const li = document.createElement('li');
+                li.className = 'flex justify-between items-center bg-secondary p-2 rounded';
+                li.innerHTML = `<span>${cat.name}</span><button data-id="${cat.id}" class="text-red-500 p-1">&times;</button>`;
+                dom.categoryList.appendChild(li);
+            });
+            // Populate dropdowns
+            const optionsHtml = `<option value="all" data-key="cat_all">${t.cat_all}</option>` + userCategories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+            dom.categoryFilter.innerHTML = optionsHtml;
+            dom.projectCategorySelect.innerHTML = userCategories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+        };
+
+        const handleFormSubmit = async (e) => {
+            e.preventDefault();
+            setLoading(true);
+            const id = dom.projectIdInput.value;
+            const file = dom.projectImageInput.files[0];
+            let imageBase64 = id ? (allProjects.find(p => p.id === id)?.imageBase64 || null) : null;
+
+            if (file) {
+                try {
+                    imageBase64 = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.readAsDataURL(file);
+                        reader.onload = () => resolve(reader.result);
+                        reader.onerror = error => reject(error);
+                    });
+                } catch (error) { console.error("Error converting file:", error); setLoading(false); return; }
+            }
+
+            const projectData = {
+                title: dom.projectForm['project-title'].value.trim(),
+                amount: parseFloat(dom.projectForm['project-amount'].value) || 0,
+                dueDate: dom.projectForm['project-due-date'].value,
+                status: dom.projectForm['project-status'].value,
+                category: dom.projectForm['project-category'].value,
+                imageBase64: imageBase64,
+                createdAt: id ? allProjects.find(p => p.id === id).createdAt : new Date().toISOString()
+            };
+            
+            const projectRef = id ? ref(db, `projects/${state.currentUserId}/${id}`) : push(ref(db, `projects/${state.currentUserId}`));
+            await set(projectRef, projectData);
+            
+            toggleModal('project', false);
+            setLoading(false);
+            showToast(id ? 'toast_project_updated' : 'toast_project_added', 'success');
+        };
+        
+        const openAddModal = () => {
+            dom.projectForm.reset();
+            const t = translations[currentLanguage];
+            dom.modalTitle.textContent = t.modal_new_project;
+            dom.formSubmitBtn.innerHTML = t.add_project_button;
+            dom.projectIdInput.value = '';
+            dom.fileNameDisplay.textContent = t.no_file_chosen;
+            dom.dueDateInput.classList.add('text-secondary');
+            toggleModal('project', true);
+        };
+
+        const openEditModal = (id) => {
+            const project = allProjects.find(p => p.id === id);
+            if(project) {
+                const t = translations[currentLanguage];
+                dom.modalTitle.textContent = t.modal_edit_project;
+                dom.formSubmitBtn.innerHTML = t.save_changes_button;
+                dom.projectIdInput.value = id;
+                dom.projectForm['project-title'].value = project.title || '';
+                dom.projectForm['project-amount'].value = project.amount || 0;
+                dom.projectForm['project-due-date'].value = project.dueDate || '';
+                dom.projectForm['project-status'].value = project.status || 'In Progress';
+                dom.projectForm['project-category'].value = project.category || '';
+                dom.fileNameDisplay.textContent = project.imageBase64 ? "Image already uploaded" : t.no_file_chosen;
+                dom.dueDateInput.classList.toggle('text-secondary', !project.dueDate);
+                toggleModal('project', true);
+            }
+        };
+        
+        const handleDeleteProject = async (e) => {
+            const id = e.target.dataset.id;
+            await remove(ref(db, `projects/${state.currentUserId}/${id}`));
+            toggleModal('delete', false);
+            showToast('toast_project_deleted', 'success');
+        }
+
+        const setLoading = (isLoading) => {
+            const t = translations[currentLanguage];
+            const buttonText = dom.projectIdInput.value ? t.save_changes_button : t.add_project_button;
+            dom.formSubmitBtn.disabled = isLoading;
+            dom.formSubmitBtn.innerHTML = isLoading ? `<div class="spinner mx-auto"></div>` : buttonText;
+        };
+
+        const toggleModal = (name, show) => document.getElementById(`${name}-modal`).classList.toggle('hidden', !show);
+        const formatCurrency = (amount) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+
+        // --- Event Listeners ---
+        dom.languageSwitcher.addEventListener('change', (e) => setLanguage(e.target.value));
+        dom.addProjectBtnNav.addEventListener('click', openAddModal);
+        dom.closeModalBtn.addEventListener('click', () => toggleModal('project', false));
+        dom.projectImageInput.addEventListener('change', () => { dom.fileNameDisplay.textContent = dom.projectImageInput.files[0]?.name || translations[currentLanguage].no_file_chosen; });
+        dom.projectForm.addEventListener('submit', handleFormSubmit);
+        dom.dueDateInput.addEventListener('change', (e) => e.target.classList.toggle('text-secondary', !e.target.value));
+        
+        dom.projectList.addEventListener('click', (e) => {
+            const button = e.target.closest('button[data-action]');
+            if (button) {
+                const { action, id } = button.dataset;
+                if (action === 'edit') openEditModal(id);
+                if (action === 'delete') { dom.confirmDeleteBtn.dataset.id = id; toggleModal('delete', true); }
+                return;
+            }
+            const image = e.target.closest('img[data-action="view-image"]');
+            if (image) { dom.fullscreenImage.src = image.src; dom.imageViewerModal.classList.remove('hidden'); }
+        });
+
+        dom.confirmDeleteBtn.addEventListener('click', handleDeleteProject);
+        dom.cancelDeleteBtn.addEventListener('click', () => toggleModal('delete', false));
+        dom.searchInput.addEventListener('input', (e) => { state.searchTerm = e.target.value; renderProjects(); });
+        dom.categoryFilter.addEventListener('change', (e) => { state.filterByCategory = e.target.value; renderProjects(); });
+        document.querySelectorAll('.filter-chip').forEach(chip => {
+            chip.addEventListener('click', (e) => {
+                document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+                const chipButton = e.currentTarget;
+                chipButton.classList.add('active');
+                state.sortBy = chipButton.dataset.sort;
+                renderProjects();
+            });
+        });
+
+        const closeImageViewer = () => { dom.imageViewerModal.classList.add('hidden'); dom.fullscreenImage.src = ''; };
+        dom.closeViewerBtn.addEventListener('click', closeImageViewer);
+        dom.imageViewerModal.addEventListener('click', (e) => { if (e.target.id === 'image-viewer-modal') closeImageViewer(); });
+
+        dom.navItems.forEach(item => item.addEventListener('click', (e) => { e.preventDefault(); switchTab(item.dataset.tab); }));
+        
+        dom.authCard.addEventListener('click', (e) => {
+            const action = e.target.dataset.action;
+            if (action) { e.preventDefault(); renderAuthForm(action.split('-')[1]); }
+        });
+        dom.authCard.addEventListener('submit', handleAuthFormSubmit);
+        
+        dom.signOutBtn.addEventListener('click', () => signOut(auth));
+        dom.themeToggle.addEventListener('change', (e) => applyTheme(e.target.checked ? 'dark' : 'light'));
+        
+        dom.categoryForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const categoryName = dom.categoryInput.value.trim();
+            if (categoryName) {
+                await push(ref(db, `categories/${state.currentUserId}`), { name: categoryName });
+                dom.categoryInput.value = '';
+                showToast('toast_category_added', 'success');
+            }
+        });
+
+        dom.categoryList.addEventListener('click', async (e) => {
+            if (e.target.tagName === 'BUTTON') {
+                const id = e.target.dataset.id;
+                await remove(ref(db, `categories/${state.currentUserId}/${id}`));
+                showToast('toast_category_deleted', 'success');
+            }
+        });
+
+        // --- Initial Load & Auth State Change ---
+        const savedLang = localStorage.getItem('projectTrackerLang') || 'en';
+        setLanguage(savedLang);
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        applyTheme(savedTheme);
+
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                state.currentUserId = user.uid;
+                dom.authContainer.classList.add('hidden');
+                dom.appContainer.classList.remove('hidden');
+                dom.appContainer.classList.add('flex');
+                
+                if (projectsDbRef) off(projectsDbRef);
+                if (categoriesDbRef) off(categoriesDbRef);
+
+                projectsDbRef = ref(db, `projects/${user.uid}`);
+                onValue(projectsDbRef, (snapshot) => {
+                    const data = snapshot.val() || {};
+                    allProjects = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+                    renderAll();
+                });
+                
+                categoriesDbRef = ref(db, `categories/${user.uid}`);
+                onValue(categoriesDbRef, (snapshot) => {
+                    const data = snapshot.val() || {};
+                    userCategories = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+                    renderCategories();
+                });
+
+            } else {
+                state.currentUserId = null;
+                allProjects = [];
+                userCategories = [];
+                if (projectsDbRef) off(projectsDbRef);
+                if (categoriesDbRef) off(categoriesDbRef);
+                
+                dom.appContainer.classList.add('hidden');
+                dom.authContainer.classList.remove('hidden');
+                dom.authContainer.classList.add('flex');
+                renderAuthForm('login');
+            }
+            dom.loadingScreen.classList.add('hidden');
+        });
+
+    </script>
+</body>
 </html>
